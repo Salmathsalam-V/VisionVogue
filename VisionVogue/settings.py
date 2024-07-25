@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'Admin',
+    'Category',
+    'Accounts',
+    'Store',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +67,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'Category.context_processors.menu_links',
+
             ],
         },
     },
@@ -71,6 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'VisionVogue.wsgi.application'
 
+AUTH_USER_MODEL = 'Accounts.Account'
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -122,3 +128,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static/")]
 STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+
+# media files configuration
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR /'media'

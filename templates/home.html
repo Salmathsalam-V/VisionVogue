@@ -1,104 +1,67 @@
+{% extends 'base.html' %} 
 {% load static %}
-<!DOCTYPE html>
-<html>
+{% block content %}       
 
-<head>
-  <!-- Basic -->
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <!-- Mobile Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <!-- Site Metas -->
-  <link rel="icon" href="{% static 'images/favicon.png' %}" type="image/gif" />
-  <meta name="keywords" content="" />
-  <meta name="description" content="" />
-  <meta name="author" content="" />
-
-  <title> gzael </title>
-
-  <!-- bootstrap core css -->
-  <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}" />
-  <!-- font awesome style -->
-  <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet" />
-  <!-- Custom styles for this template -->
-  <link href="{% static 'css/style.css' %}" rel="stylesheet" />
-  <!-- responsive style -->
-  <link href="{% static 'css/responsive.css' %}" rel="stylesheet" />
-<!-- fruitika link start -->
-        <!-- Icon Font Stylesheet -->
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-
-        <!-- Libraries Stylesheet -->
-        <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet">
-        <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
-
-
-        <!-- Customized Bootstrap Stylesheet -->
-        <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-<!-- fruitica link end -->
-</head>
-
-<body>
-        
-  <!-- slider section -->
-  <section class="slider_section position-relative">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-6 mx-auto detail_container">
-          <div class="detail-box">
-            <h1>
-              Best Glasses
-              <br> Collection
-            </h1>
-            <p>
-              It is a long established fact that a reader will be distracted by the readable content of a page when
-              looking at its layout. The point of using Lorem
-            </p>
-            <div>
-              <a href="" class="slider-link">
-                Shop Now
-              </a>
-            </div>
+        <!-- Modal Search Start -->
+        <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-fullscreen">
+              <div class="modal-content rounded-0">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Search by keyword</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body d-flex align-items-center">
+                      <div class="input-group w-75 mx-auto d-flex">
+                          <input type="search" class="form-control p-3" placeholder="keywords" aria-describedby="search-icon-1">
+                          <span id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i></span>
+                      </div>
+                  </div>
+              </div>
           </div>
-        </div>
-        <div class="col-md-4 px-0">
-          <div id="customCarousel1" class="carousel  slide" data-ride="carousel">
-            <div class="carousel-inner">
-              <div class="carousel-item active">
-                <div class="slider_img_box">
-                  <img src="{% static 'images/slider-bg.jpg' %}" alt="">
-                </div>
-              </div>
-              <div class="carousel-item">
-                <div class="slider_img_box">
-                  <img src="images/slider-bg.jpg" alt="">
-                </div>
-              </div>
-              <div class="carousel-item">
-                <div class="slider_img_box">
-                  <img src="{% static 'images/slider-bg.jpg' %}" alt="">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-      <div class="carousel_btn-box">
-        <a class="carousel-control-prev" href="#customCarousel1" role="button" data-slide="prev">
-          <i class="fa fa-angle-left" aria-hidden="true"></i>
-          <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#customCarousel1" role="button" data-slide="next">
-          <i class="fa fa-angle-right" aria-hidden="true"></i>
-          <span class="sr-only">Next</span>
-        </a>
-      </div>
-    </div>
-  </section>
-  <!-- end slider section -->
+      <!-- Modal Search End -->
 
-  <!-- category section -->
+      
+        <!-- Hero Start -->
+        <div class="container-fluid py-5 mb-5 hero-header">
+          <div class="container py-5">
+              <div class="row g-5 align-items-center">
+                  <div class="col-md-12 col-lg-7">
+                      <h4 class="mb-3 text-dark">Branded Sunglasses</h4>
+                      <h1 class="mb-5 display-3 text-black">Frame Your Style With Us...</h1>
+                      <div class="position-relative mx-auto">
+                          <input class="form-control border-2 border-dark w-75 py-3 px-4 rounded-pill" type="number" placeholder="Search">
+                          <button type="submit" class="btn btn-dark border-2 border-dark py-3 px-4 position-absolute rounded-pill text-white h-100" style="top: 0; right: 25%; background-color: hsl(271, 52%, 56%);">Submit Now</button>
+                      </div>
+                  </div>
+                  <div class="col-md-12 col-lg-5">
+                      <div id="carouselId" class="carousel slide position-relative" data-bs-ride="carousel">
+                          <div class="carousel-inner" role="listbox">
+                              <div class="carousel-item active rounded">
+                                  <img src="{% static 'images/hero-img-1.png' %}" class="img-fluid w-100 h-100 bg-secondary rounded" alt="First slide">
+                                  <a href="#" class="btn px-4 py-2 text-white rounded">Fruites</a>
+                              </div>
+                              <div class="carousel-item rounded">
+                                  <img src="{% static 'images/hero-img-2.jpg' %}" class="img-fluid w-100 h-100 rounded" alt="Second slide">
+                                  <a href="#" class="btn px-4 py-2 text-white rounded">Vesitables</a>
+                              </div>
+                          </div>
+                          <button class="carousel-control-prev" type="button" data-bs-target="#carouselId" data-bs-slide="prev">
+                              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                              <span class="visually-hidden">Previous</span>
+                          </button>
+                          <button class="carousel-control-next" type="button" data-bs-target="#carouselId" data-bs-slide="next">
+                              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                              <span class="visually-hidden">Next</span>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <!-- Hero End -->
+
+        <!-- category section -->
 
   <section class="cat_section">
     <div class="container-fluid">
@@ -148,6 +111,7 @@
 
   <!-- end category section -->
 
+
   <!-- shop section -->
 
   <section class="shop_section layout_padding">
@@ -158,201 +122,42 @@
         </h2>
       </div>
       <div class="row">
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p1.png' %}" alt="">
+        {% for product in products %}
+        <div class="col-md-6 col-lg-6 col-xl-3">
+          <div class="rounded position-relative fruite-item">
+              <div class="fruite-img">
+                <a href="{{ product.get_url }}"> 
+                <img src="{{ product.images.url }}" class="img-fluid w-100 rounded-top" alt="" style="height: 200px; width: 300px;">
+                </a> 
               </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $200
-                </h6>
+              <div class="text-white px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #453454;">{{ product.category.brand_name }}</div>
+              <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                  <a href="{{ product.get_url }}"><h4>{{ product.product_name }}</h4></a>
+                  <h6>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star" aria-hidden="true"></i>
+                    <i class="fa fa-star-half-empty" aria-hidden="true"></i>
+                  </h6>
+
+                  {% if product.stock != 0 %}
+                   <p>Available</p>
+                  {% endif %}
+                  <div class="d-flex justify-content-between flex-lg-wrap">
+                      <p class="text-dark fs-5 fw-bold mb-0">${{product.price}}</p>
+                      {% if product.stock <= 0 %}
+                       <h4 class="text-danger">Out of Stock</h4>
+                      {% else %}
+                      <a href="#" class="btn border border-secondary rounded-pill px-3 text-dark"><i class="fa fa-shopping-bag me-2" style="color: #453454;"></i> Add to cart</a>
+                      {% endif %}                                                </div>
               </div>
-            </div>
           </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p2.png' %}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $175
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p3.png '%}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $190
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p4.png' %}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $155
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p5.png' %}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $185
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p6.png' %}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $170
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p7.png' %}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $200
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-          <div class="box">
-            <div>
-              <div class="img-box">
-                <img src="{% static 'images/p8.png' %}" alt="">
-              </div>
-              <div class="detail-box">
-                <a href="">
-                  Aviator Glasses
-                </a>
-                <h6>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star" aria-hidden="true"></i>
-                  <i class="fa fa-star-half-empty" aria-hidden="true"></i>
-                </h6>
-                <h6>
-                  $180
-                </h6>
-              </div>
-            </div>
-          </div>
-        </div>
+      </div>
+        {% endfor %}
       </div>
       <div class="btn-box">
-        <a href="">
+        <a href="{% url 'store' %}">
           View All Products
         </a>
       </div>
@@ -360,6 +165,7 @@
   </section>
 
   <!-- end shop section -->
+
 
   <!-- about section -->
 
@@ -607,113 +413,5 @@
   </section>
   <!-- end client section -->
 
-  <!-- info section -->
 
-  <section class="info_section ">
-    <div class="container-fluid">
-      <div class="row info_main_row">
-        <div class="col-lg-7 mx-auto">
-          <div class="row">
-            <div class="col-md-4 info-col">
-              <div class="info_detail">
-                <h4>
-                  About
-                </h4>
-                <p>
-                  Necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with
-                </p>
-                <div class="info_social">
-                  <a href="">
-                    <i class="fa fa-facebook" aria-hidden="true"></i>
-                  </a>
-                  <a href="">
-                    <i class="fa fa-twitter" aria-hidden="true"></i>
-                  </a>
-                  <a href="">
-                    <i class="fa fa-linkedin" aria-hidden="true"></i>
-                  </a>
-                  <a href="">
-                    <i class="fa fa-instagram" aria-hidden="true"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 info-col">
-              <div class="info_contact">
-                <h4>
-                  Reach at..
-                </h4>
-                <div class="contact_link_box">
-                  <a href="">
-                    <i class="fa fa-map-marker" aria-hidden="true"></i>
-                    <span>
-                      Location
-                    </span>
-                  </a>
-                  <a href="">
-                    <i class="fa fa-phone" aria-hidden="true"></i>
-                    <span>
-                      Call +01 1234567890
-                    </span>
-                  </a>
-                  <a href="">
-                    <i class="fa fa-envelope" aria-hidden="true"></i>
-                    <span>
-                      demo@gmail.com
-                    </span>
-                  </a>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 info-col">
-              <div class="info_contact">
-                <h4>
-                  Subscribe
-                </h4>
-                <form action="#">
-                  <input type="text" placeholder="Enter email" />
-                  <button type="submit">
-                    Subscribe
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-lg-4 px-0 info-col">
-          <div class="map_container">
-            <div class="map">
-              <div id="googleMap"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- end info section -->
-  <!-- footer section -->
-  <footer class="footer_section">
-    <div class="container">
-      <p>
-        &copy; <span id="displayYear"></span> All Rights Reserved By
-        <a href="https://html.design/">Free Html Templates</a>
-      </p>
-    </div>
-  </footer>
-  <!-- footer section -->
-
-
-  <!-- jQery -->
-  <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
-  <!-- bootstrap js -->
-  <script src="{% static 'js/bootstrap.js' %}"></script>
-  <!-- custom js -->
-  <script src="{% static 'js/custom.js' %}"></script>
-  <!-- Google Map -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCh39n5U-4IoWpsVGUHWdqB6puEkhRLdmI&callback=myMap">
-  </script>
-  <!-- End Google Map -->
-</body>
-
-</html>
+{% endblock %}
