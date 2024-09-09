@@ -1,0 +1,50 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+        
+        {% for message in messages %}  
+      <div class="alert alert-{{message.tags}}" role="alert" style="margin-top: 30px">
+        <h5>{{message}}</h5>
+      </div>   
+      {% endfor %}
+      
+<h2>Brands</h2>
+<a href="{% url 'myadmin:category_create' %}" class="btn btn-primary mb-3">Add Brands</a>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Brand Logo</th>
+            <th>Discount </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.brand_name }}</td>
+            <td>
+                <!-- {% if category.brand_logo %} -->
+                <img src="{{ category.brand_logo.url }}" class="img-fluid w-50 rounded-top" alt="" style="height: 200px; width: 100px;">
+                <!-- {% else %}
+                <img src="{% static 'images/gucci.jpg' %}" class="img-fluid w-75 rounded-top" alt="" style="height: 200px; width: 100px;">
+                {% endif %}             -->
+            </td>
+            <td>
+                {{ category.discount_percentage }}
+            </td>
+            <td>
+                <a href="{% url 'myadmin:category_update' category.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                {% if not category.is_delete %}
+                <a href="{% url 'myadmin:category_delete' category.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                {% else %}
+                <a href="#" class="btn btn-sm btn-warning">soft-deleted</a>
+                {% endif %}
+                </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

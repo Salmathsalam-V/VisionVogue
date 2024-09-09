@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">My Account</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">My Account</a></li>
+        <li class="breadcrumb-item active text-dark">Address Management</li>
+    </ol>
+</div>
+<div class="container profile-container mt-3">
+    {% for message in messages %}  
+
+      <div class="alert alert-{{message.tags}}" role="alert" style="margin-top: 30px">
+        <h5>{{message}}</h5>
+      </div>
+        
+      {% endfor %}
+    <h2>Address Details</h2>
+
+    <a href="{% url 'add_address_action' %}"><button class="btn add-address-btn btn-primary">Add New Address</button></a>
+    <div class="row ">
+        <div class="col-md-6">
+            {% for i in address %}
+            <div class="card border-dark mb-3 mt-3">
+                <div class="card-body text-dark">
+                    <input type="hidden" name="pk" value="{{ i.id }}">
+                    <h5 class="card-title">{{ i.first_name }} {{ i.last_name }}    - {{ i.phone }}</h5>     
+                    <p class="card-text">{{ i.address_line_1 }} {{ i.address_line_2 }}, {{ i.city }} {{ i.state }} {{ i.country }}</p>
+                    <span class="float-end">
+                        <a href="{% url 'address_list' %}?selected_address_id={{ i.id }}" class="list-group-item list-group-item-action">
+                            <button class="btn add-address-btn btn-primary">Edit</button></a>
+                    <form method="POST" action="{% url 'delete_address' i.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button class="btn btn-danger" type="submit">Delete</button>
+                    </form>
+                    </a>
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>        
+        <div class="col-md-6">
+        <div class="address-section ms-2">
+            <form method="POST" action="{% url 'edit_address_action' %}">
+                {% csrf_token %}
+                <input type="hidden" name="pk" value="{{ addr.id }}">
+                
+                <div class="mb-3">
+                    <label for="addressFirstName" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="addressFirstName" name="addressFirstName" value="{{ addr.first_name }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="addressLastName" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="addressLastName" name="addressLastName" value="{{ addr.last_name }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="addressPhone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="addressPhone" name="addressPhone" value="{{ addr.phone }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="addressEmail" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="addressEmail" name="addressEmail" value="{{ addr.email }}" readonly>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="addressLine1" class="form-label">Address Line 1</label>
+                    <input type="text" class="form-control" id="addressLine1" name="addressLine1" value="{{ addr.address_line_1 }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="addressLine2" class="form-label">Address Line 2</label>
+                    <input type="text" class="form-control" id="addressLine2" name="addressLine2" value="{{ addr.address_line_2 }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country</label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ addr.country }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="state" class="form-label">State</label>
+                    <input type="text" class="form-control" id="state" name="state" value="{{ addr.state }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ addr.city }}">
+                </div>
+                
+                <button class="btn add-address-btn btn-success" type="submit">Update</button>
+            </form>
+            
+            
+        </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

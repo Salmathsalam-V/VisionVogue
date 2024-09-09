@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<br><br><br><br><br><br><br>
+<div class="container">
+    <h2>Your  Wallet</h2>
+    
+    <!-- Wallet Balance Display -->
+    <div class="wallet-balance" >
+        <h4>Wallet Balance: ${{ wallet.balance }}</h4>
+    </div>
+
+    <br><br>
+    <!-- Transaction History Display -->
+    <h3>Transaction History</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.id }}</td>
+                <td>{{ transaction.get_transaction_type_display }}</td>
+                <td>${{ transaction.amount }}</td>
+                <td>{{ transaction.created_at|date:"Y-m-d H:i:s" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No transactions found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

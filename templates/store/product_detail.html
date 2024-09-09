@@ -1,6 +1,6 @@
-
-    {% extends 'base.html' %}
+{% extends 'base.html' %}
     {% load static %}
+    {% load custom_filters %}
     {% block content %}
     <!-- Modal Search Start -->
         <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -28,52 +28,115 @@
             <ol class="breadcrumb justify-content-center mb-0">
                 <li class="breadcrumb-item"><a href="#">Home</a></li>
                 <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                <li class="breadcrumb-item active text-white">Shop Detail</li>
+                <li class="breadcrumb-item active text-dark">Shop Detail</li>
             </ol>
         </div>
         <!-- Single Page Header End -->
 
                 <!-- Single Product Start -->
-                <div class="container-fluid py-5 mt-5">
-                    <div class="container py-5">
-                        <div class="row g-4 mb-5">
-                            <div class="col-lg-8 col-xl-9">
-                                <div class="row g-4">
-                                    <div class="col-lg-6">
-                                        <div class="border rounded">
-                                            <a href="#">
-                                                <img src="{{ single_product.images.url }}" class="img-fluid rounded" alt="Image">
-                                            </a>
-                                        </div>
+                <div class="container py-3 mt-3">
+                    <div class="container py-3">
+                        <div class="row col-lg-12 col-xl-12 g-4 mb-5">
+                            {% if messages %}
+                            <div class="alert-messages">
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }}">
+                                        {{ message }}
                                     </div>
-                                    <div class="col-lg-6">
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div class="col-lg-8 col-xl-9">
+                                <div class="bzoom_wrap">
+                                    <ul id="bzoom">
+                                        <!-- Main image for the default variation -->
+                                        <li>
+                                            <!-- Main image for the default variation -->
+                                            <img class="bzoom_thumb_image" id="main-image" src="{{ default_variation.images.url }}" title="first img" />
+                                            <img class="bzoom_big_image" src="{{ default_variation.images.url }}" alt="{{ single_product.product_name }}">
+                                        </li>
+                                        <!-- Gallery images for the default variation -->
+                                        {% for image in gallery_images %}
+                                            <li id="gallery-images">
+                                                <img class="bzoom_thumb_image" src="{{ image.images.url }}" />
+                                                <img class="bzoom_big_image" src="{{ image.images.url }}" />
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4 col-xl-3">
+                                <form action="{% url 'cart:add_cart' default_variation.id %}" method="POST" id="add-to-cart-form">
+                                    {% csrf_token %}
                                         <h4 class="fw-bold mb-3">{{ single_product.product_name }}</h4>
                                         <p class="mb-3">Brand: {{ single_product.category.brand_name }}</p>
-                                        <h5 class="fw-bold mb-3">${{ single_product.price }}</h5>
-                                        <div class="d-flex mb-4">
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star text-secondary"></i>
-                                            <i class="fa fa-star"></i>
+                                        <p class="mb-3"> {{ single_product.sex }}</p>
+                                                <del><p class="text-danger text-decoration-line-through">${{  default_variation.price }}</p></del>
+                                                <h5 class="fw-bold me-2">{{default_variation.offer_price}}</h5>
+                                            
+                                                <h5 class="fw-bold mb-3"> {{ single_product.price }}</p>
+                                        <p class="mb-3">Features: {{ single_product.features }}</p>
+
+                                        <div class="rating-box">
+                                            {{ single_product.average_rating}}<i class="fa fa-star selected"></i>
                                         </div>
-                                        <p class="mb-4"> {{ single_product.category.description }}</p>
-                                        <p class="mb-4">{{ single_product.description }}</p>
-                                        <div class="input-group quantity mb-5" style="width: 100px;">
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-sm btn-minus rounded-circle bg-light border" >
-                                                    <i class="fa fa-minus"></i>
-                                                </button>
-                                            </div>
-                                            <input type="text" class="form-control form-control-sm text-center border-0" value="1">
-                                            <div class="input-group-btn">
-                                                <button class="btn btn-sm btn-plus rounded-circle bg-light border">
-                                                    <i class="fa fa-plus"></i>
-                                                </button>
-                                            </div>
+                                        <span>({{ single_product.review_count }} reviews)</span>
+
+                                        <!-- <p class="mb-4"> {{ single_product.category.description }}</p> -->
+                                        <!-- <p class="mb-4">{{ single_product.description }}</p> -->
+                                        <div class="mt-3">
+                                            <hr>
+                                            <div class="row">
+                                                <p class="mb-3">Colour: 
+                                                    <form action="{% url 'cart:add_cart' single_product.id %}" method="POST" id="variant-form">
+                                                        {% csrf_token %}
+                                                    <select name="color" class="form-control" required id="color-select">
+                                                        {% for variation in variations %}
+                                                            <option value="{{ variation.id }}"
+                                                            data-id="{{ variation.id }}"
+                                                            data-main-image="{{ variation.images.url }}"
+                                                            data-gallery-images="{% for image in all_gallery_images %}
+                                                                {% if image.variation == variation %}
+                                                                {{ image.images.url }}{% if not forloop.last %},{% endif %}
+                                                                {% endif %}
+                                                                {% endfor %}"
+                                                            data-price="{{ variation.price }}"
+                                                            data-offer-price="{{ variation.offer_price }}"
+                                                            data-stock="{{ variation.stock }}" >
+                                                            {{ variation.variation_value }} {{ variation.id }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    </form>
+                                                </p>
+                                                                            
+                                                </div>
+                                                <p class="mb-3">Stock: <span id="stock-info">{{ default_variation.stock }}</span></p>
+
                                         </div>
-                                        <a href="#" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                    </div>
+                                       <div class="mt-3">
+                                        {% if variation_stock <= 0 %}
+                                            <h4 class="text-danger">Out of Stock</h4>
+                                        {% else %}
+                                        {% if in_cart %}
+                                        <div class="row">
+                                        <a href="" class="btn border border-secondary rounded-pill px-2 py-2 mb-2 text-primary"><i class="fa fa-check me-2 text-primary"></i> Added to cart </a>
+                                        <a href="{% url 'cart:cart' %}" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-eye me-2 text-primary"></i> View to cart </a>
+                                        </div>
+                                        {% else %}
+                                        <button type="submit" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</button>
+                                        {% endif %}
+                                        {% endif %}
+                                        </div>
+                            </form>    
+                            </div>
+
+                                </div>
+                            </div>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
                                     <div class="col-lg-12">
                                         <nav>
                                             <div class="nav nav-tabs mb-3">
@@ -87,51 +150,49 @@
                                         </nav>
                                         <div class="tab-content mb-5">
                                             <div class="tab-pane active" id="nav-about" role="tabpanel" aria-labelledby="nav-about-tab">
-                                                <p>The generated Lorem Ipsum is therefore always free from repetition injected humour, or non-characteristic words etc. 
-                                                    Susp endisse ultricies nisi vel quam suscipit </p>
-                                                <p>Sabertooth peacock flounder; chain pickerel hatchetfish, pencilfish snailfish filefish Antarctic 
-                                                    icefish goldeye aholehole trumpetfish pilot fish airbreathing catfish, electric ray sweeper.</p>
+                                                <p>{{ single_product.category.description }} </p>
+                                                <p>{{ single_product.description }}</p>
                                                 <div class="px-2">
                                                     <div class="row g-4">
                                                         <div class="col-6">
                                                             <div class="row bg-light align-items-center text-center justify-content-center py-2">
                                                                 <div class="col-6">
-                                                                    <p class="mb-0">Weight</p>
+                                                                    <p class="mb-0">color</p>
                                                                 </div>
                                                                 <div class="col-6">
-                                                                    <p class="mb-0">1 kg</p>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row text-center align-items-center justify-content-center py-2">
-                                                                <div class="col-6">
-                                                                    <p class="mb-0">Country of Origin</p>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <p class="mb-0">Agro Farm</p>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row bg-light text-center align-items-center justify-content-center py-2">
-                                                                <div class="col-6">
-                                                                    <p class="mb-0">Quality</p>
-                                                                </div>
-                                                                <div class="col-6">
-                                                                    <p class="mb-0">Organic</p>
+                                                                    <p class="mb-0">{{ single_product.lens_color }}</p>
                                                                 </div>
                                                             </div>
                                                             <div class="row text-center align-items-center justify-content-center py-2">
                                                                 <div class="col-6">
-                                                                    <p class="mb-0">Сheck</p>
+                                                                    <p class="mb-0">Frame</p>
                                                                 </div>
                                                                 <div class="col-6">
-                                                                    <p class="mb-0">Healthy</p>
+                                                                    <p class="mb-0">premium glass</p>
                                                                 </div>
                                                             </div>
                                                             <div class="row bg-light text-center align-items-center justify-content-center py-2">
                                                                 <div class="col-6">
-                                                                    <p class="mb-0">Min Weight</p>
+                                                                    <p class="mb-0">case</p>
                                                                 </div>
                                                                 <div class="col-6">
-                                                                    <p class="mb-0">250 Kg</p>
+                                                                    <p class="mb-0">no</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row text-center align-items-center justify-content-center py-2">
+                                                                <div class="col-6">
+                                                                    <p class="mb-0">temple tip</p>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <p class="mb-0">black</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row bg-light text-center align-items-center justify-content-center py-2">
+                                                                <div class="col-6">
+                                                                    <p class="mb-0">quality</p>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <p class="mb-0">high</p>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -140,7 +201,7 @@
                                             </div>
                                             <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
                                                 <div class="d-flex">
-                                                    <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
+                                                    <img src="{% static 'img/avatar.jpg' %}" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
                                                     <div class="">
                                                         <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
                                                         <div class="d-flex justify-content-between">
@@ -158,7 +219,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex">
-                                                    <img src="img/avatar.jpg" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
+                                                    <img src="{% static 'img/avatar.jpg' %}" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
                                                     <div class="">
                                                         <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
                                                         <div class="d-flex justify-content-between">
@@ -184,336 +245,225 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <form action="#">
-                                        <h4 class="mb-5 fw-bold">Leave a Reply</h4>
-                                        <div class="row g-4">
-                                            <div class="col-lg-6">
-                                                <div class="border-bottom rounded">
-                                                    <input type="text" class="form-control border-0 me-4" placeholder="Yur Name *">
+                                    <h4 class="mb-5 fw-bold">Leave a Reply</h4>
+                                    <div class="bg-light p-4 rounded">
+                                        <form action="{% url 'store:post_review' single_product.id %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="row g-4">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group border-bottom rounded">
+                                                        <input type="text" name="name" class="form-control border-0 me-4" placeholder="Your Name *" required>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-6">
-                                                <div class="border-bottom rounded">
-                                                    <input type="email" class="form-control border-0" placeholder="Your Email *">
+                                                <div class="col-lg-6">
+                                                    <div class="form-group border-bottom rounded">
+                                                        <input type="email" name="email" class="form-control border-0" placeholder="Your Email *" value="{{ request.user.email }}" >
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-12">
-                                                <div class="border-bottom rounded my-4">
-                                                    <textarea name="" id="" class="form-control border-0" cols="30" rows="8" placeholder="Your Review *" spellcheck="false"></textarea>
+                                                <div class="col-lg-12">
+                                                    <div class="form-group border-bottom rounded my-4">
+                                                        <textarea name="review" class="form-control border-0" cols="30" rows="8" placeholder="Your Review *" spellcheck="false" required></textarea>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-lg-12">
-                                                <div class="d-flex justify-content-between py-3 mb-5">
-                                                    <div class="d-flex align-items-center">
-                                                        <p class="mb-0 me-3">Please rate:</p>
-                                                        <div class="d-flex align-items-center" style="font-size: 12px;">
-                                                            <i class="fa fa-star text-muted"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
+                                                <div class="col-lg-12">
+                                                    <div class="d-flex justify-content-between py-3 mb-5">
+                                                        <div class="d-flex align-items-center">
+                                                            <p class="mb-0 me-3">Please rate:</p>
+                                                            <div class="rating d-flex align-items-center" style="font-size: 20px;">
+                                                                <i class="fa fa-star" data-value="1"></i>
+                                                                <i class="fa fa-star" data-value="2"></i>
+                                                                <i class="fa fa-star" data-value="3"></i>
+                                                                <i class="fa fa-star" data-value="4"></i>
+                                                                <i class="fa fa-star" data-value="5"></i>
+                                                            </div>
+                                                            <input type="hidden" name="rating" id="rating" required>
                                                         </div>
+                                                        <button type="submit" class="btn border border-secondary text-primary rounded-pill px-4 py-3">Post Comment</button>
                                                     </div>
-                                                    <a href="#" class="btn border border-secondary text-primary rounded-pill px-4 py-3"> Post Comment</a>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </form>
+                                        </form>
+                                    </div>
+                                    
                                 </div>
                             </div>
-                            <div class="col-lg-4 col-xl-3">
-                                <div class="row g-4 fruite">
-                                    <div class="col-lg-12">
-                                        <div class="input-group w-100 mx-auto d-flex mb-4">
-                                            <input type="search" class="form-control p-3" placeholder="keywords" aria-describedby="search-icon-1">
-                                            <span id="search-icon-1" class="input-group-text p-3"><i class="fa fa-search"></i></span>
-                                        </div>
-                                        <div class="mb-4">
-                                            <h4>Categories</h4>
-                                            <ul class="list-unstyled fruite-categorie">
-                                                <li>
-                                                    <div class="d-flex justify-content-between fruite-name">
-                                                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Apples</a>
-                                                        <span>(3)</span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="d-flex justify-content-between fruite-name">
-                                                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Oranges</a>
-                                                        <span>(5)</span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="d-flex justify-content-between fruite-name">
-                                                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Strawbery</a>
-                                                        <span>(2)</span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="d-flex justify-content-between fruite-name">
-                                                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Banana</a>
-                                                        <span>(8)</span>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <div class="d-flex justify-content-between fruite-name">
-                                                        <a href="#"><i class="fas fa-apple-alt me-2"></i>Pumpkin</a>
-                                                        <span>(5)</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <h4 class="mb-4">Featured products</h4>
-                                        <div class="d-flex align-items-center justify-content-start">
-                                            <div class="rounded" style="width: 100px; height: 100px;">
-                                                <img src="img/featur-1.jpg" class="img-fluid rounded" alt="Image">
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-2">Big Banana</h6>
-                                                <div class="d-flex mb-2">
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <h5 class="fw-bold me-2">2.99 $</h5>
-                                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-start">
-                                            <div class="rounded" style="width: 100px; height: 100px;">
-                                                <img src="img/featur-2.jpg" class="img-fluid rounded" alt="">
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-2">Big Banana</h6>
-                                                <div class="d-flex mb-2">
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <h5 class="fw-bold me-2">2.99 $</h5>
-                                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-start">
-                                            <div class="rounded" style="width: 100px; height: 100px;">
-                                                <img src="img/featur-3.jpg" class="img-fluid rounded" alt="">
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-2">Big Banana</h6>
-                                                <div class="d-flex mb-2">
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <h5 class="fw-bold me-2">2.99 $</h5>
-                                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-start">
-                                            <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                                <img src="img/vegetable-item-4.jpg" class="img-fluid rounded" alt="">
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-2">Big Banana</h6>
-                                                <div class="d-flex mb-2">
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <h5 class="fw-bold me-2">2.99 $</h5>
-                                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-start">
-                                            <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                                <img src="img/vegetable-item-5.jpg" class="img-fluid rounded" alt="">
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-2">Big Banana</h6>
-                                                <div class="d-flex mb-2">
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <h5 class="fw-bold me-2">2.99 $</h5>
-                                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-center justify-content-start">
-                                            <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                                <img src="img/vegetable-item-6.jpg" class="img-fluid rounded" alt="">
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-2">Big Banana</h6>
-                                                <div class="d-flex mb-2">
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star text-secondary"></i>
-                                                    <i class="fa fa-star"></i>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <h5 class="fw-bold me-2">2.99 $</h5>
-                                                    <h5 class="text-danger text-decoration-line-through">4.11 $</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex justify-content-center my-4">
-                                            <a href="#" class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">Vew More</a>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-12">
-                                        <div class="position-relative">
-                                            <img src="img/banner-fruits.jpg" class="img-fluid w-100 rounded" alt="">
-                                            <div class="position-absolute" style="top: 50%; right: 10px; transform: translateY(-50%);">
-                                                <h3 class="text-secondary fw-bold">Fresh <br> Fruits <br> Banner</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        
                         </div>
-                        <h1 class="fw-bold mb-0">Related products</h1>
-                        <div class="vesitable">
+                        <div class="vesitable container">
+                            <h1 class="fw-bold mb-0">Related products</h1>
                             <div class="owl-carousel vegetable-carousel justify-content-center">
+                                {% for i in recommend %}
                                 <div class="border border-primary rounded position-relative vesitable-item">
                                     <div class="vesitable-img">
-                                        <img src="img/vegetable-item-6.jpg" class="img-fluid w-100 rounded-top" alt="">
+                                        <a href="{{ i.get_url }}">
+                                        <img src="{{ i.images.url }}" class="img-fluid w-100 rounded-top" style="height: 200px; width: 300px;" alt="">
+                                        </a>
                                     </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
+                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">{{i.category.brand_name}}</div>
                                     <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Parsely</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
+                                        <a href="{{ i.get_url }}">
+                                        <h4>{{i.product_name}}</h4>
+                                        </a>
+                                        <p></p>
                                         <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$4.99 / kg</p>
+                                            <p class="text-dark fs-5 fw-bold">${{ i.price }}</p>
                                             <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-1.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Parsely</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$4.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-3.png" class="img-fluid w-100 rounded-top bg-light" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Banana</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-4.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Bell Papper</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-5.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Potatoes</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-6.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Parsely</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-5.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Potatoes</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="border border-primary rounded position-relative vesitable-item">
-                                    <div class="vesitable-img">
-                                        <img src="img/vegetable-item-6.jpg" class="img-fluid w-100 rounded-top" alt="">
-                                    </div>
-                                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">Vegetable</div>
-                                    <div class="p-4 pb-0 rounded-bottom">
-                                        <h4>Parsely</h4>
-                                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p>
-                                        <div class="d-flex justify-content-between flex-lg-wrap">
-                                            <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
-                                            <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
-                                        </div>
-                                    </div>
-                                </div>
+                                {% endfor %}
+                               
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Single Product End -->
+                 <!-- zoom script start -->
+                 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+                 <script type="text/javascript" src="{% static 'js/jqzoom.js' %}"></script>
+                 <script type="text/javascript">
+                 $("#bzoom").zoom({
+                     zoom_area_width: 300,
+                     autoplay_interval :3000,
+                     small_thumbs : 4,
+                     autoplay : false
+                 });
+                 </script>
+                 <script type="text/javascript">
+                 
+                   var _gaq = _gaq || [];
+                   _gaq.push(['_setAccount', 'UA-36251023-1']);
+                   _gaq.push(['_setDomainName', 'jqueryscript.net']);
+                   _gaq.push(['_trackPageview']);
+                 
+                   (function() {
+                     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                   })();
+                 
+                 </script>
+                  <!-- zoom script end -->
 
+                   <!-- rating  start-->
+                   <style>
+                    .rating .fa {
+                        cursor: pointer;
+                        color: #ccc;
+                        transition: color 0.2s;
+                    }
+                    .rating .fa:hover,
+                    .rating .fa.selected {
+                        color: #ffc107;
+                    }
+.rating-box {
+            background-color: #28a745; /* Green background */
+            color: white; /* White text */
+            padding: 5px 5px;
+            border-radius: 1px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 15%;
+            font-size: 1rem; /* Larger text size */
+        }
+        .rating-box .fa-star {
+            margin-right: 5px;
+            color: white; /* White star */
+        }
+
+                </style>
+                
+                <script>
+                    const stars = document.querySelectorAll('.rating .fa');
+                    const ratingInput = document.getElementById('rating');
+                
+                    stars.forEach(star => {
+                        star.addEventListener('click', () => {
+                            stars.forEach(s => s.classList.remove('selected'));
+                            star.classList.add('selected');
+                            ratingInput.value = star.getAttribute('data-value');
+                            for (let i = 0; i < star.getAttribute('data-value'); i++) {
+                                stars[i].classList.add('selected');
+                            }
+                        });
+                    });
+                </script>
+                <!-- review end -->
+                 <!-- varients start -->                 
+                <script>
+                        function updateGallery(imageUrls) {
+                            var galleryContainer = document.getElementById('bzoom'); // Use the existing gallery container
+                            galleryContainer.innerHTML = ''; // Clear existing images
+
+                            imageUrls.forEach(function (imageUrl) {
+                                var li = document.createElement('li');
+                                li.innerHTML = `<img class="bzoom_thumb_image" src="${imageUrl}" />
+                                                <img class="bzoom_big_image" src="${imageUrl}" />`;
+                                galleryContainer.appendChild(li);
+                            });
+                        }
+
+                        document.getElementById('color-select').addEventListener('change', function () {
+                            // Get the selected option
+                            var selectedOption = this.options[this.selectedIndex];
+                            
+                            // Extract data from selected option's data attributes
+                            var mainImage = selectedOption.getAttribute('data-main-image');
+                            var galleryImages = selectedOption.getAttribute('data-gallery-images').split(',');
+                            var price = selectedOption.getAttribute('data-price');
+                            var offerPrice = selectedOption.getAttribute('data-offer-price');
+                            var stock = selectedOption.getAttribute('data-stock');
+                            const addToCartForm = document.getElementById("add-to-cart-form");
+
+                            // Function to update the form action based on the selected variation
+                            function updateFormAction() {
+                                const selectedOption = colorSelect.options[colorSelect.selectedIndex];
+                                const variationId = selectedOption.getAttribute('data-id');
+
+                                // Update form action with the selected variation ID
+                                addToCartForm.action = `/cart/add_cart/${variationId}/`;
+                            }
+                            // Update the main product image
+                            var mainImageElement = document.getElementById('main-image');
+                            mainImageElement.src = mainImage;
+
+                            // Update the zoom big image if necessary
+                            var zoomImageElement = document.querySelector('.bzoom_big_image');
+                            zoomImageElement.src = mainImage;
+
+
+                            // Update the price and offer price
+                            document.querySelector('.text-danger').textContent = `$${price}`;
+                            document.querySelector('.fw-bold').textContent = `$${offerPrice}`;
+
+                            // Update the stock
+                            document.getElementById('stock-info').textContent = stock;
+                                // // Update the gallery images
+                                // var mainLi = document.createElement('li');
+                                // mainLi.innerHTML = `<img class="bzoom_thumb_image" src="${mainImage}" />
+                                //                     <img class="bzoom_big_image" src="${mainImage}" />`;
+                                // galleryContainer.appendChild(mainLi);
+
+                                // // Add the new gallery images
+                                // galleryImages.forEach(function (imageUrl) {
+                                //     var li = document.createElement('li');
+                                //     li.innerHTML = `<img class="bzoom_thumb_image" src="${imageUrl}" />
+                                //                     <img class="bzoom_big_image" src="${imageUrl}" />`;
+                                //     galleryContainer.appendChild(li);
+                                // });
+                            // updateGallery(data.imageUrls);
+                            // Reinitialize or refresh the zoom plugin
+                            $('#bzoom').trigger('zoom.destroy'); // Destroy the existing zoom
+                            $('#bzoom').zoom();  // Reinitialize the zoom plugin
+                            $('#bzoom').zoom({
+                            zoom_area_width: 300,
+                            autoplay_interval: 3000,
+                            small_thumbs: 4,
+                            autoplay: false
+                        });
+                        });
+
+                </script> 
+                  <!-- varients end -->
 {% endblock %}
+

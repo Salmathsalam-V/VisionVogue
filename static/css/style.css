@@ -970,7 +970,8 @@ a:focus {
 
 /*** Hero Header fruitika***/
 .hero-header {
-  background: linear-gradient(rgba(248, 223, 173, 0.1), rgba(248, 223, 173, 0.1)), url(../img/hero-img.jpg);
+  background: linear-gradient(rgba(248, 223, 173, 0.1), rgba(248, 223, 173, 0.1));
+  background-image: url('../images/hero-img.jpg');
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -1080,3 +1081,169 @@ a:focus {
   border-bottom: 2px solid var(--bs-secondary) !important;
 }
 /*** Single Page End ***/
+/* tzoom */
+.bzoom { direction: ltr; }
+
+.bzoom,
+.bzoom_thumb,
+.bzoom_thumb_image,
+.bzoom_big_image,
+.bzoom_zoom_preview,
+.bzoom_icon,
+.bzoom_hint { display: none }
+
+.bzoom_thumb_image {
+  width: 700px;
+}
+
+.bzoom .bzoom_thumb { background: #fff url(./img/loading.gif) center no-repeat; }
+
+.bzoom,
+.bzoom ul,
+.bzoom li,
+.bzoom img,
+.bzoom_hint,
+.bzoom_icon,
+.bzoom_description {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  list-style: none
+}
+
+.bzoom,
+.bzoom_magnifier div,
+.bzoom_magnifier div img,
+.bzoom_small_thumbs ul,
+ul .bzoom_small_thumbs li,
+.bzoom_zoom_area div,
+.bzoom_zoom_img { position: relative }
+
+.bzoom img,
+.bzoom li {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -moz-user-drag: none;
+  -webkit-user-drag: none
+}
+
+.bzoom,
+.bzoom_small_thumbs li { float: left }
+
+.bzoom_right { float: right }
+
+.bzoom li { position: absolute }
+
+.bzoom img {
+  vertical-align: bottom;
+  width: 50px;
+  height: 70px
+}
+
+.bzoom .bzoom_zoom_area,
+.bzoom_zoom_area {
+  background: #fff url(./img/loading.gif) center no-repeat;
+  border: 1px solid #ddd;
+  padding: 6px;
+  -webkit-box-shadow: 0 0 10px #ddd;
+  -moz-box-shadow: 0 0 10px #ddd;
+  box-shadow: 0 0 10px #ddd;
+  display: none;
+  z-index: 20;
+}
+
+.bzoom_zoom_area div { overflow: hidden; }
+
+.bzoom_zoom_area .bzoom_zoom_img { position: absolute; }
+
+.bzoom_wrap .bzoom_magnifier {
+  background: #fff;
+  outline: #bbb solid 1px;
+  display: none;
+  cursor: move;
+}
+
+.bzoom_magnifier div { overflow: hidden; }
+
+.bzoom_wrap .bzoom_small_thumbs { overflow: hidden; }
+
+.bzoom_wrap .bzoom_small_thumbs li {
+  border: 1px solid #FFF;
+  margin: 0px 10px 0px 0px;
+  position: relative;
+}
+
+.bzoom_wrap ul li.bzoom_smallthumb_active {
+  -webkit-box-shadow: 0 0 10px #ddd;
+  -moz-box-shadow: 0 0 10px #ddd;
+  box-shadow: 0 0 10px #ddd;
+  border: 1px solid #535353;
+}
+
+
+/* Button with a rounded left corner and flat right side */
+.btn-search {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* my account */
+.account-box {
+  border: 2px solid #333; /* Add a solid border with your preferred color */
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  transition: box-shadow 0.3s ease; /* Optional: Adds a smooth shadow transition */
+}
+.account-box:hover {
+  background-color: #e2e6ea;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+}
+.account-box i {
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #343a40;
+}
+.account-box p {
+  margin: 0;
+  font-weight: bold;
+}
+.account-box {
+  border: 2px solid #ddd;           /* Light gray border */
+  border-radius: 5px;               /* Rounded corners */
+  padding: 20px;                    /* Padding inside the box */
+  text-align: center;               /* Center the content */
+  transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
+  background-color: #f8f8f8;        /* Light background color */
+  cursor: pointer;                  /* Change cursor on hover */
+}
+
+.account-box i {
+  font-size: 24px;                  /* Larger icon size */
+  margin-bottom: 10px;              /* Space between icon and text */
+  color: #333;                      /* Icon color */
+}
+
+.account-box p {
+  font-size: 18px;                  /* Larger text for title */
+  font-weight: 600;                 /* Bold text */
+  color: #333;                      /* Text color */
+}
+
+.account-box span {
+  font-size: 14px;                  /* Smaller text for subtitle */
+  color: #777;                      /* Subtitle color */
+}
+
+.account-box:hover {
+  border-color: rgb(145, 84, 201);            /* Change border color on hover */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+  background-color: hsl(271, 52%, 96%);           /* Change background color on hover */
+}

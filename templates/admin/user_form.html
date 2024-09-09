@@ -1,0 +1,14 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h2>{% if form.instance.pk %}Edit{% else %}Add{% endif %} User</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Save</button>
+    {% if not form.instance.is_block %}
+    <button type="submit" class="btn btn-danger" name="block">Block</button>
+    {% else %}
+    <button type="submit" class="btn btn-success" name="unblock">Unblock</button>
+    {% endif %}
+</form>
+{% endblock %}

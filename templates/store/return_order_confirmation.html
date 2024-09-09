@@ -1,0 +1,18 @@
+
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<body>
+    <h1>Return Order</h1>
+    <p>Are you sure you want to Return the order #{{ order.id }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <label>Reason : </label><input type="text" name="reason" id="reason">
+        <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+        <a href="{% url 'order_detail' order.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</body>
+{% endblock %}

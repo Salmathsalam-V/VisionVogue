@@ -1,0 +1,35 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h1>Category Offers</h1>
+    <a href="{% url 'myadmin:category_offer_create' %}" class="btn btn-primary">Add New Category Offer</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Discount Percentage</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for offer in offers %}
+                <tr>
+                    <td>{{ offer.category }}</td>
+                    <td>{{ offer.discount_percentage }}%</td>
+                    <td>{{ offer.start_date }}</td>
+                    <td>{{ offer.end_date }}</td>
+                    <td>
+                        <a href="{% url 'myadmin:category_offer_update' offer.pk %}" class="btn btn-warning">Edit</a>
+                        <a href="{% url 'myadmin:category_offer_delete' offer.pk %}" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No category offers found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

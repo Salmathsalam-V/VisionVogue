@@ -9,9 +9,25 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
 import os
+from dotenv import load_dotenv
 from pathlib import Path
+
+
+load_dotenv()
+
+SITE_ID=2
+# GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
+# if not GOOGLE_OAUTH_CLIENT_ID:
+#     raise ValueError(
+#         'GOOGLE_OAUTH_CLIENT_ID is missing.' 
+#         'Have you put it in a file at in visionvogue.env ?'
+#     )
+
+# We need these lines below to allow the Google sign in popup to work.
+SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -28,7 +44,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,11 +53,44 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'easy_thumbnails',
+    'image_cropping',
     'Admin',
     'Category',
     'Accounts',
     'Store',
+    'carts',
+    'Orders',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google'
 ]
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email"
+        ],
+        "AUTH_PARAMS" :{ "access_type" : "online" }
+    }
+}
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Ensure email verification is mandatory
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True  # Activate the account once the email is confirmed
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True  # Automatically log in the user once email is confirmed
+
+
+THUMBNAIL_PROCESSORS = (
+    'image_cropping.thumbnail_processors.crop_corners',
+    'easy_thumbnails.processors.colorspace',
+    'easy_thumbnails.processors.autocrop',
+    'easy_thumbnails.processors.scale_and_crop',
+    'easy_thumbnails.processors.filters',
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -52,6 +100,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'VisionVogue.urls'
@@ -68,7 +117,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'Category.context_processors.menu_links',
-
+                'carts.context_processors.counter',
             ],
         },
     },
@@ -77,7 +126,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'VisionVogue.wsgi.application'
 
 AUTH_USER_MODEL = 'Accounts.Account'
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
@@ -132,3 +180,47 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 # media files configuration
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR /'media'
+
+# email
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = "salmathsalam1020@gmail.com"
+EMAIL_HOST_PASSWORD = "dcgz cwsr gkti mwei"
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False 
+
+# password
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,  # Increase the minimum length as needed
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+
+
+AUTHENTICATION_BACKENDS =(
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend"
+)
+# login
+LOGIN_REDIRECT_URL = "/"
+# logout
+LOGOUT_REDIRECT_URL = "/" 
+
+RAZOR_PAY_KEY_ID = 'rzp_test_b0Mik8b8qR8I43'
+KEY_SECRET = 'IU2TsYkc4gLiKfavad75WNRR'

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">My Account</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active text-dark">My Account</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+{% for message in messages %}  
+
+      <div class="alert alert-{{message.tags}}" role="alert" style="margin-top: 30px">
+        <h5>{{message}}</h5>
+      </div>
+        
+{% endfor %}
+<div class="container mt-5">
+    <h2>My Account</h2>
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'orders' %}">
+            <div class="account-box">
+                <i class="bi bi-bag-check"></i>
+                <p>Your Orders</p>
+                <span>Track, return or buy new things</span>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'store:wishlist' %}">
+            <div class="account-box">
+                <i class="bi bi-heart"></i>
+                <p>Wish List</p>
+                <span>Your wish lists</span>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'address_list' %}">
+            <div class="account-box">
+                <i class="bi bi-house-door"></i>
+                <p>Your Address</p>
+                <span>Edit address for orders and gifts</span>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'wallet' %}">
+            <div class="account-box">
+                <i class="bi bi-wallet2"></i>
+                <p>Wallet</p>
+                <span>Available amount ₹2000</span>
+            </div>
+        </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="account-box">
+                <i class="bi bi-credit-card"></i>
+                <p>Payment Options</p>
+                <span>Add payment options</span>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'profile' %}">
+            <div class="account-box">
+                <i class="bi bi-person"></i>
+                <p>Profile Details</p>
+                <span>Edit login, name and mobile number</span>
+            </div>
+        </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'coupon_list_view' %}">
+            <div class="account-box">
+                <i class="bi bi-ticket-detailed"></i>
+                    <p>Coupons and Vouchers</p>
+                <span>Checkout coupons and vouchers</span>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'contact' %}">
+            <div class="account-box">
+                <i class="bi bi-headset"></i>
+                <p>Contact Us</p>
+                <span>Edit address for orders and gifts</span>
+            </div>
+        </a>
+        </div>
+        <div class="col-md-4 mb-3">
+            <a href="{% url 'logout' %}">
+            <div class="account-box">
+                <i class="bi bi-door-open"></i>
+                <p>Log out</p>
+                <span>Logout from your account</span>
+            </div>
+            </a>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.js"></script>
+{% endblock %}

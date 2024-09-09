@@ -21,7 +21,16 @@ from django.conf import settings
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('dj-admin/', admin.site.urls),
     path('',views.home,name='home'),
-    path('store/', include('Store.urls'))
+    path('contatc-us',views.contact,name='contact'),
+    path('store/', include('Store.urls')),
+    path('account/', include("Accounts.urls")),
+    path('admin/', include("Admin.urls")),
+    path('cart/', include("carts.urls")),
+    path('order/', include("Orders.urls")),
+    path('accounts', include("allauth.urls"))
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+

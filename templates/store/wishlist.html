@@ -1,0 +1,126 @@
+<!-- wishlist.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<br><br><br><br><br><br><br><br>
+
+<div class="container">
+  <h1>Your Wishlist</h1>
+  {% if wishlist.count > 0 %}
+  <p>You have {{ wishlist.count }} items in your wishlist.</p>
+<div class="row">
+  {% for product in wishlist %}
+  <div class="col-md-6 col-lg-6 col-xl-3">
+      <div class="rounded position-relative fruite-item">
+          <div class="fruite-img">
+            <a href="{{ product.get_url }}"> 
+            <img src="{{ product.first_variation_image.images.url }}" class="img-fluid w-100 rounded-top" alt="" style="height: 200px; width: 300px;">
+            </a> 
+          </div>
+          <div class="text-white px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #453454;">{{ product.category.brand_name }}</div>
+          <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+              <a href="{{ product.get_url }}"><h4>{{ product.product_name }}</h4></a>
+              <div class="rating-box">
+                {{ product.average_rating }}
+                 <i class="fa fa-star selected"></i>
+                 <a href="{% url 'store:remove_from_wishlist' product.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
+                  <i class="fa-solid fa-heart" style="color: #ff0000;"></i>                                           
+              </a>
+            </div>
+            <!-- If the product is already in the wishlist, show a filled heart icon -->
+           
+              <p>{{product.color}}</p>
+              <div class="d-flex justify-content-between flex-lg-wrap">
+                
+                {% if product.discounted_price < product.price %}
+                <del>${{ product.price }}</del>    
+                <p> ${{ product.discounted_price }}</p>
+                {% else %}
+                ${{ product.price }}
+                {% endif %}
+
+            </div>
+            <div class="d-flex justify-content-between flex-lg-wrap">
+                  {% if product.stock <= 0 %}
+                    <a href="#" class="btn border border-danger rounded-pill px-3 text-danger">Out Of Stock</a>
+
+                  {% else %}
+                  <a href="{% url 'cart:add_cart' product.id %}" class="btn border border-secondary rounded-pill px-3 text-dark"><i class="fa fa-shopping-bag me-2" style="color: #453454;"></i> Add to cart</a>
+                  {% endif %}                                                
+            </div>
+          </div>
+      </div>
+  </div>
+  {% endfor %}
+  </div>
+  <br><hr><br>
+  <div class="vesitable container">
+    <h1 class="fw-bold mb-0">Related products</h1>
+    <div class="owl-carousel vegetable-carousel justify-content-center">
+        {% for i in recommend %}
+        <div class="border border-primary rounded position-relative vesitable-item">
+            <div class="vesitable-img">
+                <a href="{{ i.get_url }}">
+                <img src="{{ i.first_variation_image.images.url  }}" class="img-fluid w-100 rounded-top" style="height: 200px; width: 300px;" alt="">
+                </a>
+            </div>
+            <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">{{i.category.brand_name}}</div>
+            <div class="p-4 pb-0 rounded-bottom">
+                <a href="{{ i.get_url }}">
+                <h4>{{i.product_name}}</h4>
+                </a>
+                <p></p>
+                <div class="d-flex justify-content-between flex-lg-wrap">
+                    <p class="text-dark fs-5 fw-bold">${{ i.price }}</p>
+                    <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+       
+    </div>
+</div>
+</div>
+{% else %}
+    <p>Your wishlist is empty.</p>
+    <script src="https://kit.fontawesome.com/eb9e91f22c.js" crossorigin="anonymous"></script>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <script>
+        function addToWishlist(event, url) {
+            event.preventDefault();  // Prevent the default anchor click behavior
+    
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',  // Ensure CSRF token is included
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Optionally display a notification
+                    Swal.fire({
+                        toast: true,
+                        position: 'bottom',
+                        icon: 'none',
+                        title: data.message,
+                        showConfirmButton: false,
+                        timer: 1500,
+                        customClass: {
+                            title: 'text-center',
+                        }
+                    }).then(() => {
+                        location.reload();  // Refresh the page
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script> 
+{% endblock %}

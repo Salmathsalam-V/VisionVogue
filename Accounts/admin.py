@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Account
+from .models import OtpToken
+from .models import Account,Wallet,Referral
 
 
 # Register your models here.
@@ -14,5 +15,11 @@ class AccountAdmin(UserAdmin):
     filter_horizontal = ()
     list_filter = ()
     fieldsets = ()
+class OtpTokenAdmin(admin.ModelAdmin):
+    list_display = ("user", "otp_code")
 
+
+admin.site.register(OtpToken, OtpTokenAdmin)
 admin.site.register(Account,AccountAdmin)
+admin.site.register(Wallet)
+admin.site.register(Referral)

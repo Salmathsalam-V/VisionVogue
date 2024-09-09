@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block content %}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">My Orders</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item active text-white">Orders</li>
+    </ol>
+</div>
+<!-- Page Header End -->
+{% for message in messages %}  
+
+      <div class="alert alert-{{message.tags}}" role="alert" style="margin-top: 30px">
+        <h5>{{message}}</h5>
+      </div>
+        
+      {% endfor %}
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <h1 class="mb-4">Order History</h1>
+        {% for order in orders %}
+        <div class="order-summary mb-5 p-4 border rounded">
+            <div class="row col-12">
+                <div class="d-flex justify-content-between col-5">
+                    <div>
+                        <h5>Order ID: {{ order.order_number }}</h5>
+                        <p>Status: <span class="text-success">{{ order.status }}</span></p>
+                        {% if order.status == 'Accepted' %}
+                        <p>Delivery Date: {{ order.delivery_date }}</p>
+                        {% endif %}
+                        <p>Order Date: {{ order.created_at }}</p>
+                        <p>Subtotal: {{ order.sub_total }}</p>
+                        <p>Total: ${{ order.order_total }}</p>
+                    </div>
+                </div>
+                <div class="order-products mt-4 col-5">
+                    {% for order_product in order_products|get_item:order.id %}
+                    <div class="d-flex mb-3">
+                        <img src="{{ order_product.variation.images.url }}" class="img-fluid me-3 rounded" style="width: 200px; height: 100px;" alt="">
+                        <div>
+                            <h6>{{ order_product.product.product_name }}</h6>
+                            <p>Quantity: {{ order_product.quantity }}</p>
+                            <p>Price: ${{ order_product.product_price }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>No products found for this order.</p>
+                    {% endfor %}
+                </div>
+                <div class="col-2 mt-3">
+                    {% if order.status == 'Cancelled' %}
+                    <b>Order cancelled</b>
+                    {% endif %}
+                    <div class="mt-2">
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-primary">View Order</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    
+
+        
+
+
+    </div>
+</div>
+
+{% endblock %}

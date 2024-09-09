@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h1>Order Products for Order #{{ order.order_number }}</h1>
+<div class="order-summary mb-5 p-4 border rounded">
+    <div class="d-flex justify-content-between row" >
+        <div class="col-4">
+            <p><strong>ID               :</strong> {{ order.order_number }}</p>
+            <p><strong>Status          : </strong> <span class="text-success">{{ order.get_status_display }}</span></p>
+            <p><strong>Ordered Date      : </strong> {{ order.created_at }}</p>
+            {% if order.status == "Accepted" %}
+            <p><strong>Delivery Date      : </strong> {{ order.delivery_date }}</p>
+            {% endif %}
+            <p><strong>Is_ordered     : </strong> {{ order.is_ordered }}</p>
+            <p><strong>Total           : </strong> ${{ order.order_total }}</p>
+            <!-- <p><strong>Payment Method  : </strong> {{ payment.payment_method }}</p> -->
+
+            <p><strong>Name and Phone  : </strong> {{ order.address.first_name }} {{ order.address.last_name }}, {{ order.address.phone }}</p>
+            <p><strong>Email           : </strong> {{ order.address.email }}</p>
+            <p><strong>Delivery Address: </strong> {{ order.address.address_line_1 }}, {{ order.address.city }}, {{ order.address.state }}, {{ order.address.country }}</p>
+
+        </div>
+        <div class="order-products mt-4 col-5">
+            <h5>Products in this order</h5>
+            {% for item in order_products %}
+            <div class="d-flex mb-3">
+                <img src="{{ item.product.images.url }}" class="img-fluid me-3 rounded" style="width: 200px; height: 100px;" alt="">
+                <div>
+                    <h6>{{ item.product.product_name }}</h6>
+                    <p>Quantity: {{ item.quantity }}</p>
+                    <p>Price: ${{ item.product_price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="col-3">
+            <a href="{% url 'myadmin:update_order_status' order.id %}" class="btn btn-primary mt-3">Update Status</a>
+
+            <a href="{% url 'myadmin:view_orders' %}" class="btn btn-primary mt-3">Back to Orders</a>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

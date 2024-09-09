@@ -1,0 +1,34 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<h2>Coupon List</h2>
+<a href="{% url 'myadmin:coupon_create' %}" class="btn btn-primary">Add Coupon</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Discount (%)</th>
+            <th>Active</th>
+            <th>Created At</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for coupon in coupons %}
+        <tr>
+            <td>{{ coupon.code }}</td>
+            <td>{{ coupon.discount }}</td>
+            <td>{{ coupon.active }}</td>
+            <td>{{ coupon.created_at }}</td>
+            <td>
+                <a href="{% url 'myadmin:coupon_update' coupon.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                <form method="post" action="{% url 'myadmin:coupon_delete' coupon.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

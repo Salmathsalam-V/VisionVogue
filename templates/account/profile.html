@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">My Account</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">My Account</a></li>
+        <li class="breadcrumb-item active text-dark">Profile</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+{% for message in messages %}  
+
+      <div class="alert alert-{{message.tags}}" role="alert" style="margin-top: 30px">
+        <h5>{{message}}</h5>
+      </div>
+        
+      {% endfor %}
+<div class="container profile-container">
+    <div class="row">
+        <!-- User Profile Section -->
+        <div class="col-md-6">
+            <div class="profile-section">
+                <h2>User Profile</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ profile_form.as_p }}
+                    <button class="btn add-address-btn" name="update_profile" type="submit">Update Profile</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-6 mt-5">
+            <a href="{% url 'change_password' %}"> <button class="btn btn-primary"> Change password</button></a>
+            <br><a href="{% url 'wallet' %}"><button class="btn mt-3"> <h4>Wallet Balance:</h4></button></a>
+             ${{ wallet.balance }} 
+            <p>Referral Code</p>
+            <p>Your Referral Code: {{ referral_code }}</p>
+        </div>
+</div>
+</div>
+{% endblock %}

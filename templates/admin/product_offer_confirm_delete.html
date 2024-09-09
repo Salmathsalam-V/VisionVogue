@@ -1,0 +1,11 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h1>Confirm Delete</h1>
+    <p>Are you sure you want to delete the offer for <strong>{{ offer.product }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirm</button>
+        <a href="{% url 'myadmin:product_offer_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

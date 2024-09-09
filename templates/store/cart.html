@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+    <!-- Single Page Header start -->
+    <div class="container-fluid page-header py-5">
+        <h1 class="text-center text-white display-6">Cart</h1>
+        <ol class="breadcrumb justify-content-center mb-0">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">store</a></li>
+            <li class="breadcrumb-item active text-dark">Cart</li>
+        </ol>
+    </div>
+    <!-- Single Page Header End -->
+    
+    {% if messages %}
+    <div class="alert-messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Cart Page Start -->
+    {% if cart_items %}
+        <div class="container-fluid py-5">
+            <div class="container py-5">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">Products</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Offer Price</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Handle</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {% for cart_item in cart_items %}
+                                    <tr>
+                                        <th scope="row">
+                                            <div class="d-flex align-items-center">
+                                                <a href="{{ cart_item.product.get_url }}"><img src="{{ cart_item.variation.images.url }}" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt=""></a>
+                                            </div>
+                                        </th>
+                                        <td>
+                                            <p class="mb-0 mt-4">{{ cart_item.product.product_name }}</p>
+                                            <p>{{ cart_item.product.category.brand_name }} - {{ cart_item.product.color }}</p>
+                                            <p>{{ cart_item.variation.variation_value }}
+                                            </p>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 mt-4">${{ cart_item.variation.price }}</p>
+                                        </td>
+                                        <td>
+                                            <div class="input-group quantity mt-4" style="width: 100px;">
+                                                <div class="input-group-btn">
+                                                    <a href="{% url 'cart:remove_cart' cart_item.id  %}" class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                                        <i class="fa fa-minus"></i>
+                                                    </a>
+                                                </div>
+                                                <input type="text" class="form-control form-control-sm text-center border-0" value="{{ cart_item.quantity }}" readonly>
+                                                <div class="input-group-btn">
+                                                    <a href="{% url 'cart:add_cart' cart_item.variation.id %}" class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                                        <i class="fa fa-plus"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 mt-4">${{ cart_item.variation.offer_price }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 mt-4">${{ cart_item.sub_total }}</p>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'cart:remove_cart_item' cart_item.id  %}" class="btn btn-md rounded-circle bg-light border mt-4">
+                                                <i class="fa fa-times text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-5">
+                    <form method="POST" action="{% url 'cart:apply_coupon' %}">
+                        {% csrf_token %}
+                        <input type="text" name="coupon_code" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+                        <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="submit">Apply Coupon</button>
+                    </form>
+                    {% if applied_coupons %}
+                        <h3>Applied Coupons</h3>
+                        <ul>
+                            {% for coupon in applied_coupons %}
+                                <li>{{ coupon.code }}: {{ coupon.discount }}% off</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No coupons applied.</p>
+                    {% endif %}
+                </div>
+                <div class="row g-4 justify-content-end">
+                    <div class="col-8"></div>
+                    <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                        <div class="bg-light rounded">
+                            <div class="p-4">
+                                <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                                <div class="d-flex justify-content-between mb-4">
+                                    <h5 class="mb-0 me-4">Subtotal:</h5>
+                                    <p class="mb-0">${{ total|floatformat:2 }}</p>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h5 class="mb-0 me-4">Shipping</h5>
+                                    <div>
+                                        <p class="mb-0">Cost: $100.00</p>
+                                    </div>
+                                </div>
+                            
+                            {% if discount > 0 %}
+                                <div class="d-flex justify-content-between mb-4">
+                                    <h5 class="mb-0 me-4">You saved</h5>
+                                    <p class="mb-0"> -{{ discount|floatformat:2 }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                            <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                                <h5 class="mb-0 ps-4 me-4">Total</h5>
+                                <p class="mb-0 pe-4">${{ grand_total|floatformat:2 }}</p>
+                            </div>
+                            <div class="justify-content-center">
+                            <a href="{% url 'cart:checkout' %}"> <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed to Checkout</button></a>
+                           <br> <a href="{% url 'store:store' %}"> Continue Shopping</button></a>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Cart Page End -->
+    {% else %}
+        <center><h2 style="text-align: center; color: black;">Your cart is empty</h2>
+            <br>
+            <div class="text-center">
+                <a href="{% url 'store:store' %}">Continue Shopping</a>
+            </div>
+        </center>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to update cart
+            function updateCart(productId, quantity) {
+                fetch('/cart/update/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken() // Fetch CSRF token for security
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: quantity })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update cart UI with the new data
+                        document.querySelector('#cart-quantity').textContent = data.quantity;
+                        document.querySelector('#cart-subtotal').textContent = data.subtotal;
+                        document.querySelector('#cart-grandtotal').textContent = data.grand_total;
+                    } else {
+                        alert(data.error);
+                    }
+                });
+            }
+        
+            // Example event listener for adding a product to the cart
+            document.querySelector('#add-to-cart-button').addEventListener('click', function() {
+                var productId = this.getAttribute('data-product-id');
+                var quantity = parseInt(document.querySelector('#product-quantity').value);
+                updateCart(productId, quantity);
+            });
+        
+            // Function to get CSRF token
+            function getCsrfToken() {
+                let csrfToken = null;
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.split('=');
+                    if (name.trim() === 'csrftoken') {
+                        csrfToken = value;
+                        break;
+                    }
+                }
+                return csrfToken;
+            }
+        });
+        </script>
+        
+{% endblock %}

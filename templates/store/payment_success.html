@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Thank You for Your Order!</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item active text-white">Thank You</li>
+    </ol>
+</div>
+<!-- Page Header End -->
+
+<!-- Thank You Message Start -->
+<div class="container-fluid ">
+    <div class="container py-5 text-center">
+        <h2 class="display-4">Order Successful!</h2>
+        <p class="lead mb-4">Thank you for shopping with us. Your order has been placed successfully.</p>
+        <p><strong>Order Number:</strong> {{ order.order_number }}</p>
+        <p><strong>Total Amount:</strong> ${{ order.order_total }}</p>
+        <p><strong>Order status:</strong> {{ order.status }}</p>
+        {% if payment_method == "Wallet" %}
+        <a href="{% url 'wallet' %}" class="btn btn-dark mt-4">Wallet</a>
+        {% endif %}
+        <!-- <p><strong>Payment Method:</strong> {{ payment_method }}</p> -->
+        <a href="{% url 'orders' %}" class="btn btn-primary mt-4">View Your Orders</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary mt-4">Continue Shopping</a>
+    </div>
+</div>
+<!-- Thank You Message End -->
+
+{% endblock %}
+

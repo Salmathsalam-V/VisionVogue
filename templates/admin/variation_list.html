@@ -1,0 +1,39 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+
+{% for message in messages %}  
+
+<div class="alert alert-{{message.tags}}" role="alert" style="margin-top: 30px">
+  <h5>{{message}}</h5>
+</div>
+  
+{% endfor %}
+
+<h2>Variation List</h2>
+<a href="{% url 'myadmin:add_variation' %}" class="btn btn-primary mb-3">Add variation</a>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Value</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for variation in variations %}
+        <tr>
+            <td>{{ variation.product }}</td>
+            <td>{{ variation.variation_category }}</td>
+            <td>{{ variation.variation_value }}</td>
+            <td>{{ variation.stock }}</td>
+            <td>
+                <a href="{% url 'myadmin:update_variation' variation.pk %}">Edit</a> |
+                <a href="{% url 'myadmin:delete_variation' variation.pk %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

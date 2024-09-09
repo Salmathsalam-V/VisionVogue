@@ -1,0 +1,16 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h2>{{ variation.product }} - Edit Variation</h2>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <h3>Upload Images</h3>
+    {{ formset.management_form }}
+    {% for form in formset %}
+        {{ form.as_p }}
+    {% endfor %}
+    <button type="submit">Save</button>
+    <a href="{% url 'myadmin:variation_list' %}">Cancel</a>
+</form>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Coupons</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">My Account</a></li>
+        <li class="breadcrumb-item active text-dark">Coupons</li>
+    </ol>
+</div>
+    <style>
+        .coupon {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .copy-button {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid fruite ">
+        <div class="container py-3">
+    <h1>Available Coupons</h1>
+    <div id="coupon-list">
+        {% for coupon in coupons %}
+            <div class="coupon">
+                <p>Code: <span id="code-{{ coupon.id }}">{{ coupon.code }}</span></p>
+                <p>Discount: {{ coupon.discount }}%</p>
+                <button class="copy-button" onclick="copyCode('{{ coupon.id }}')">Copy Code</button>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+</div>
+    <script>
+        function copyCode(couponId) {
+            var codeElement = document.getElementById('code-' + couponId);
+            var code = codeElement.innerText;
+            
+            navigator.clipboard.writeText(code).then(function() {
+                alert('Coupon code copied: ' + code);
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+{% endblock %}

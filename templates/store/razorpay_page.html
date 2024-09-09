@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<br><br><br><br><br><br><br><br>
+<div class="container payment-container">
+    <h1>Payment Details</h1>
+    <button class="btn btn-success pay-now-btn" id="rzp-button">Pay Now</button>
+</div>
+
+<!-- Hidden form to handle the payment success redirect -->
+<form id="payment-success-form" method="POST" action="{% url 'payment_success' order.id %}" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+    <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+</form>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ payment_data.key }}",
+        "amount": "{{ payment_data.amount }}",
+        "currency": "INR",
+        "name": "VisionVogue",
+        "description": "Order #{{ order.order_number }}",
+        "order_id": "{{ payment_data.id }}",
+        "handler": function (response){
+            // Set the values of the hidden form
+            document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+            document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+            document.getElementById('razorpay_signature').value = response.razorpay_signature;
+
+            // Submit the hidden form to redirect to the success page
+            document.getElementById('payment-success-form').submit();
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.on('payment.failed', function (response){
+        alert(response.error.description);
+    });
+    document.getElementById('rzp-button').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+{% endblock %}

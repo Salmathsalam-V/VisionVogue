@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid black;
+        }
+        h1, h2, p {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sales Report</h1>
+    <h2>Summary</h2>
+    <p>Total Sales: {{ total_sales }}</p>
+    <p>Total Orders: {{ total_orders }}</p>
+    <p>Total Discounts: {{ total_discount }}</p>
+
+    <h2>Order Details</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Item Name</th>
+              <th>Quantity Sold</th>
+              <th>Total Discount</th>
+              <th>Total Sales</th>
+              <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+            <tr>
+                <td>{{ item.orderproduct__product__product_name }}</td>
+                <td>{{ item.total_quantity }}</td>
+                <td>{{ item.total_discount }}</td>
+                <td>{{ item.sub_total }}</td>
+                <td>{{ item.total_sales }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
