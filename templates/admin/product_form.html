@@ -18,6 +18,7 @@
       </div>
         
       {% endfor %}
+      
     <div class="container">
         <h1 class="text-center">Create Product</h1>
         <form method="post" enctype="multipart/form-data">
@@ -27,112 +28,13 @@
             {{ form.non_field_errors }}
             
             <!-- Custom rendering for image fields -->
-            <div class="row">
-                <div class="col-md-4">
-                    <label for="{{ form.images.id_for_label }}">Primary Image</label>
-                    <input type="file" id="{{ form.images.id_for_label }}" name="{{ form.images.name }}" style="display: none;">
-                    <div id="image-box-images" class="image-crop-area">
-                        <img id="preview-images" src="{{ form.images.value.url }}" alt="Image Preview" style="{% if form.images.value %}display:block{% else %}display:none{% endif %};">
-                    </div>
-                    <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-images">Crop & Upload</button>
-                </div>
-        
-                <div class="col-md-4">
-                    <label for="{{ form.image2.id_for_label }}">Secondary Image</label>
-                    <input type="file" id="{{ form.image2.id_for_label }}" name="{{ form.image2.name }}" style="display: none;">
-                    <div id="image-box-image2" class="image-crop-area">
-                        <img id="preview-image2" src="{{ form.image2.value.url }}" alt="Image Preview" style="{% if form.image2.value %}display:block{% else %}display:none{% endif %};">
-                    </div>
-                    <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-image2">Crop & Upload</button>
-                </div>
-        
-                <div class="col-md-4">
-                    <label for="{{ form.image3.id_for_label }}">Tertiary Image</label>
-                    <input type="file" id="{{ form.image3.id_for_label }}" name="{{ form.image3.name }}" style="display: none;">
-                    <div id="image-box-image3" class="image-crop-area">
-                        <img id="preview-image3" src="{{ form.image3.value.url }}" alt="Image Preview" style="{% if form.image3.value %} display:block {% else %}display:none {% endif %};">
-                    </div>
-                    <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-image3">Crop & Upload</button>
-                </div>
-            </div>
-        
             <!-- Other form fields -->
             {{ form.errors }}
+            
             <button type="submit" class="btn btn-success mt-4">Save Product</button>
         </form>
         
     </div>
 
-    <style>
-        .image-crop-area {
-            width: 300px; /* Adjust the display size */
-            height: 200px;
-            margin-top: 10px;
-            border: 2px dashed #ccc;
-            position: relative;
-        }
-        .image-crop-area img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: cover;
-        }
-    </style>
-
-    <!-- JavaScript for image cropping -->
-    <script>
-        function setupCropper(inputId, imageBoxId, confirmBtnId) {
-            const input = document.getElementById(inputId);
-            const imageBox = document.getElementById(imageBoxId);
-            const confirmBtn = document.getElementById(confirmBtnId);
-            const csrf = document.getElementsByName('csrfmiddlewaretoken');
-
-            input.addEventListener('change', () => {
-                confirmBtn.classList.remove('not-visible');
-                const img_data = input.files[0];
-                const url = URL.createObjectURL(img_data);
-
-                imageBox.innerHTML = `<img src="${url}" id="image-${inputId}" class="croppable-image">`;
-                var $image = $(`#image-${inputId}`);
-                $image.cropper({
-                    aspectRatio: 16 / 9,
-                    viewMode: 1,  // This fixes the image, allowing only the cropping box to move
-                    dragMode: 'move',  // Allows moving the cropping box only
-                    crop: function(event) {
-                        // Handle cropping events if needed
-                    }
-                });
-
-                var cropper = $image.data('cropper');
-                confirmBtn.addEventListener('click', () => {
-                    cropper.getCroppedCanvas().toBlob((blob) => {
-                        console.log('confirmed');
-                        const fd = new FormData();
-                        fd.append('csrfmiddlewaretoken', csrf[0].value);
-                        fd.append(inputId, blob, `${inputId}-cropped.png`);
-
-                        $.ajax({
-                            type: 'POST',
-                            url: window.location.href,
-                            enctype: 'multipart/form-data',
-                            data: fd,
-                            success: function(response) {
-                                console.log('success', response);
-                            },
-                            error: function(error) {
-                                console.log('error', error);
-                            },
-                            cache: false,
-                            contentType: false,
-                            processData: false,
-                        });
-                    });
-                });
-            });
-        }
-
-        setupCropper('id_images', 'image-box-images', 'confirm-btn-images');
-        setupCropper('id_image2', 'image-box-image2', 'confirm-btn-image2');
-        setupCropper('id_image3', 'image-box-image3', 'confirm-btn-image3');
-    </script>
 
 {% endblock %}

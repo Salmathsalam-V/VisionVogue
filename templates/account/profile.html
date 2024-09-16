@@ -20,7 +20,7 @@
         
       {% endfor %}
 <div class="container profile-container">
-    <div class="row">
+    <div class="row py-3">
         <!-- User Profile Section -->
         <div class="col-md-6">
             <div class="profile-section">
@@ -33,9 +33,16 @@
             </div>
         </div>
         <div class="col-md-6 mt-5">
-            <a href="{% url 'change_password' %}"> <button class="btn btn-primary"> Change password</button></a>
-            <br><a href="{% url 'wallet' %}"><button class="btn mt-3"> <h4>Wallet Balance:</h4></button></a>
-             ${{ wallet.balance }} 
+            <a href="{% url 'change_password' %}"> <button class="btn" style="background-color:#453453 ; color:white"> Change password</button></a>
+            <br><div class="wallet-box">
+                <a href="{% url 'wallet' %}">
+                    <button class="btn wallet-btn mt-3">
+                        <h4>Wallet Balance:</h4>
+                    </button>
+                </a>
+                <b>{{ wallet.balance }}</b>
+            </div>
+            
             <p>Referral Code</p>
             <p>Your Referral Code: {{ referral_code }}</p>
         </div>

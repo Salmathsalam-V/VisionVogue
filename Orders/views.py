@@ -1,4 +1,5 @@
 import datetime
+import json
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render,redirect
 from Accounts.models import Address, Transaction, Wallet
@@ -11,6 +12,12 @@ import razorpay
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
 from django.db.models import Prefetch
+from django.template.loader import render_to_string
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+import os
+from django.http import JsonResponse
+
 
 # Create your views here.
 def place_order(request, total=0, quantity=0):
@@ -46,7 +53,6 @@ def place_order(request, total=0, quantity=0):
         data = Order(
             user=current_user,
             address=addr,
-            sub_total=subtotal,
             order_total=grand_total,
             discount_amount=discount,
             ip=request.META.get('REMOTE_ADDR'),
@@ -57,7 +63,8 @@ def place_order(request, total=0, quantity=0):
         data.order_number = order_number
         data.is_ordered = False
         data.save()
-
+        print(data)
+        
         cartid.coupons.clear()
 
         # Payment method handling
@@ -93,12 +100,14 @@ def place_order(request, total=0, quantity=0):
                     user=current_user,
                     product=cart_item.product,
                     quantity=cart_item.quantity,
-                    product_price=cart_item.variation.offer_price,
+                    product_price=(cart_item.variation.price)*cart_item.quantity,
+                    variation = cart_item.variation
                 )
                 variation = cart_item.variation
                 variation.stock -= cart_item.quantity
                 variation.save()
             cart_items.delete()
+            print(order_product)
             order_id=data.id
             return redirect('payment_success',order_id)
         
@@ -134,9 +143,9 @@ def place_order(request, total=0, quantity=0):
                     order=data,
                     user=current_user,
                     product=cart_item.product,
-                    variation = cart_item.variation,
                     quantity=cart_item.quantity,
-                    product_price=cart_item.variation.offer_price,  # Use variation price
+                    product_price=(cart_item.variation.offer_price)*cart_item.quantity,
+                    variation = cart_item.variation  
                 )
                 # Deduct variation stock
                 cart_item.variation.stock -= cart_item.quantity
@@ -178,7 +187,8 @@ def razorpay_page(request, order_id):
             user=request.user,
             product=cart_item.product,
             quantity=cart_item.quantity,
-            product_price=cart_item.variation.offer_price,  # Use variation price
+            product_price=(cart_item.variation.offer_price)*cart_item.quantity,
+            variation = cart_item.variation
         )
             # Deduct variation stock
         cart_item.variation.stock -= cart_item.quantity
@@ -193,6 +203,33 @@ def razorpay_page(request, order_id):
         'order': order,
     }
     return render(request, 'store/razorpay_page.html', context)
+
+@csrf_exempt  # Make sure you have CSRF token protection for AJAX POST requests
+def payment_failed(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        order_id = data.get('order_id')
+        error_description = data.get('error_description')
+
+        try:
+            # Get the order and payment object
+            order = Order.objects.get(id=order_id)
+            payment = Payment.objects.get(order=order)
+
+            # Update payment status to "Pending"
+            payment.status = 'Pending'
+            payment.save()
+
+            return JsonResponse({'status': 'success'}, status=200)
+
+        except Order.DoesNotExist:
+            return JsonResponse({'error': 'Order not found'}, status=404)
+
+        except Payment.DoesNotExist:
+            return JsonResponse({'error': 'Payment not found'}, status=404)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 
 def view_orders(request):
     if request.user.is_authenticated:
@@ -245,8 +282,8 @@ def cancel_order(request, order_id):
         order.status = 'Cancelled'
         for item in order_products:
             # Restock the product
-            item.product.stock += item.quantity
-            item.product.save()
+            item.variation.stock += item.quantity
+            item.variation.save()
             item.save()
         order.save()
     order=Order.objects.get(id=order_id)
@@ -297,3 +334,40 @@ def return_order(request, order_id):
     wallet.balance = balance
     wallet.save()
     return redirect('order_detail', order_id=order_id)
+
+def generate_invoice_pdf(request, order_id):
+    try:
+        order = Order.objects.get(id=order_id)
+    except Order.DoesNotExist:
+        return HttpResponse("Order does not exist")
+
+    order_products = OrderProduct.objects.filter(order=order)
+    payment = Payment.objects.filter(order=order_id).first()
+
+    # Prepare the context for the invoice template
+    context = {
+        'order': order,
+        'order_products': order_products,
+        'payment': payment,
+        'total_price': order.order_total,
+    }
+
+    
+    # Load the template
+    template_path = 'store/invoice_template.html'  # Adjust the path as needed
+    template = get_template(template_path)
+    html = template.render(context)
+
+    # Create a PDF from the rendered HTML
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_number}.pdf"'
+
+     # Generate PDF from the HTML
+    pisa_status = pisa.CreatePDF(
+        html, dest=response
+    )
+    if pisa_status.err:
+        return HttpResponse("We had some errors with the PDF generation")
+
+    # Return the generated PDF response
+    return response

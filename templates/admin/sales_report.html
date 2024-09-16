@@ -1,54 +1,80 @@
 {% extends 'admin/base.html' %}
 {% block content %}
-  <h1>Sales Report</h1>
-  <form method="get" id="filterForm">
-      <label for="period">Period:</label>
-      <select name="period" id="period" onchange="toggleDateFields()">
-          <option value="">Custom</option>
-          <option value="daily" {% if period == 'daily' %}selected{% endif %}>Daily</option>
-          <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
-          <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
-      </select>
-      <div id="customDateFields">
-          <label for="start_date">Start Date:</label>
-          <input type="date" name="start_date" id="start_date" value="{{ start_date|date:'Y-m-d' }}">
-          <label for="end_date">End Date:</label>
-          <input type="date" name="end_date" id="end_date" value="{{ end_date|date:'Y-m-d' }}">
-      </div>
-      <button type="submit">Filter</button>
-      <button type="submit" name="export_pdf" value="true">Export PDF</button>
-      <button type="submit" name="export_excel" value="true">Export Excel</button>
-  </form>
+  <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <style>
+      #customDateFields {
+          display: none;
+      }
+      h1, h2 {
+          margin-top: 20px;
+      }
+      .form-group {
+          margin-bottom: 15px;
+      }
+      .table {
+          margin-top: 30px;
+      }
+    </style>
+  </head>
+  <div class="container mt-1">
+    <h1 class="text-center">Sales Report</h1>
+    <form method="get" id="filterForm">
+        <label for="period">Period:</label>
+        <select name="period" id="period" onchange="toggleDateFields()">
+            <option value="">Custom</option>
+            <option value="daily" {% if period == 'daily' %}selected{% endif %}>Daily</option>
+            <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
+            <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
+        </select>
+        <div id="customDateFields">
+            <label for="start_date">Start Date:</label>
+            <input type="date" name="start_date" id="start_date" value="{{ start_date|date:'Y-m-d' }}">
+            <label for="end_date">End Date:</label>
+            <input type="date" name="end_date" id="end_date" value="{{ end_date|date:'Y-m-d' }}">
+        </div><br>
+        <button type="submit" class="btn btn-primary me-2">Filter</button>
+        <button type="submit" name="export_pdf" value="true" class="btn btn-danger me-2">Export PDF</button>
+        <button type="submit" name="export_excel" value="true" class="btn btn-success">Export Excel</button>
+      
+    </form>
 
-  <h2>Summary</h2>
-  <p>Total Sales: {{ total_sales }}</p>
-  <p>Total Orders: {{ total_orders }}</p>
-  <p>Total Discounts: {{ total_discount }}</p>
-  <!-- <p>Sub Total: {{ sub_total }}</p> -->
+    <h2 class="mt-5">Summary</h2>
+        <p><strong>Total Sales:</strong> {{ total_sales }}</p>
 
-  <h2>Order Details</h2>
-  <table>
-      <thead>
-          <tr>
-              <th>Item Name</th>
-              <th>Quantity Sold</th>
-              <th>Total Discount</th>
-              <th>Total Sales</th>
-              <th>Total</th>
-          </tr>
+      <p><strong>Total Orders:</strong> {{ total_orders }}</p>
+
+        <p><strong>Total Discounts:</strong> {{ total_discount }}</p>
+      
+
+    <h2 class="mt-5">Order Details</h2>
+    <table class="table table-bordered ">
+      <thead class="thead">
+        <tr>
+          <th>Item Name</th>
+          <th>Variation Value</th> 
+          <th>Price</th>
+          <th>Offer Price</th>
+          <th>Quantity Sold</th>
+          <th>Total Discount</th>
+          <th>Total Sales</th>
+        </tr>
       </thead>
       <tbody>
-          {% for item in data %}
-          <tr>
-              <td>{{ item.orderproduct__product__product_name }}</td>
-              <td>{{ item.total_quantity }}</td>
-              <td>{{ item.total_discount }}</td>
-              <td>{{ item.sub_total }}</td>
-              <td>{{ item.total_sales }}</td>
-          </tr>
-          {% endfor %}
+        {% for item in data %}
+        <tr>
+          <td>{{ item.orderproduct__variation__product__product_name }}</td> <!-- Product name -->
+          <td>{{ item.orderproduct__variation__variation_value }}</td> <!-- Variation value -->
+          <td>{{ item.orderproduct__variation__price }}</td>
+          <td>{{ item.orderproduct__variation__offer_price }}</td>
+          <td>{{ item.total_quantity }}</td> <!-- Total quantity sold -->
+          <td>{{ item.total_discount }}</td> <!-- Total discount -->
+          <td>{{ item.total_sales }}</td> <!-- Total sales -->
+        </tr>
+        {% endfor %}
       </tbody>
-  </table>
+    </table>
+  </div>
 
   <script>
     function toggleDateFields() {

@@ -18,14 +18,15 @@
         <div class="col-md-4">
             <label for="{{ form.brand_logo.id_for_label }}">Brand Image</label>
             <input type="file" id="{{ form.brand_logo.id_for_label }}" name="{{ form.brand_logo.name }}" style="display: none;">
-            <div id="image-box-brand_logo" class="image-crop-area"></div>
-            <img id="preview-images" src="{{ form.brand_logo.value.url }}" alt="Image Preview" style="{% if form.brand_logo.value %}display:block{% else %}display:none{% endif %};">
-
-            <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-brand_logo">Crop & Upload</button>
-        </div>
+            </div>
     <button type="submit" class="btn btn-primary mt-3">Save</button>
 </form>
 
+<div id="image-box-brand_logo" class="image-crop-area"></div>
+            <img id="preview-images" src="{{ form.brand_logo.value.url }}" alt="Image Preview" style="{% if form.brand_logo.value %}display:block{% else %}display:none{% endif %};">
+
+            <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-brand_logo">Crop & Upload</button>
+        
 <style>
     .image-crop-area {
         width: 300px; /* Adjust the display size */

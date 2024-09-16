@@ -9,43 +9,51 @@
   {% if wishlist.count > 0 %}
   <p>You have {{ wishlist.count }} items in your wishlist.</p>
 <div class="row">
-  {% for product in wishlist %}
+  {% for variation in wishlist %}
   <div class="col-md-6 col-lg-6 col-xl-3">
       <div class="rounded position-relative fruite-item">
           <div class="fruite-img">
             <a href="{{ product.get_url }}"> 
-            <img src="{{ product.first_variation_image.images.url }}" class="img-fluid w-100 rounded-top" alt="" style="height: 200px; width: 300px;">
+            <img src="{{ variation.images.url }}" class="img-fluid w-100 rounded-top" alt="" style="height: 200px; width: 300px;">
             </a> 
           </div>
-          <div class="text-white px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #453454;">{{ product.category.brand_name }}</div>
+          <div class="text-white px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #453454;">{{ variation.product.category.brand_name }}</div>
           <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-              <a href="{{ product.get_url }}"><h4>{{ product.product_name }}</h4></a>
+              <a href="{{ product.get_url }}"><h4>{{ variation.product.product_name }}</h4></a>
               <div class="rating-box">
-                {{ product.average_rating }}
+                {{ variation.product.average_rating }}
                  <i class="fa fa-star selected"></i>
-                 <a href="{% url 'store:remove_from_wishlist' product.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
-                  <i class="fa-solid fa-heart" style="color: #ff0000;"></i>                                           
-              </a>
-            </div>
+                 
+                        {% if variation in wishlist %}
+                         <!-- If the product is already in the wishlist, show a filled heart icon -->
+                         <a href="{% url 'store:remove_from_wishlist' variation.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
+                             <i class="fa-solid fa-heart" style="color: #ff0000;"></i>
+                         </a>
+                        {% else %}
+                         <!-- If the product is not in the wishlist, show an empty heart icon -->
+                         <a href="{% url 'store:add_to_wishlist' variation.id %}" title="Add to Wishlist" onclick="addToWishlist(event, this.href)">
+                             <i class="far fa-heart"></i>
+                         </a>
+                        {% endif %}
+                 
+             </div>
             <!-- If the product is already in the wishlist, show a filled heart icon -->
            
-              <p>{{product.color}}</p>
+              <p>{{variation.variation_value}}</p>
               <div class="d-flex justify-content-between flex-lg-wrap">
                 
-                {% if product.discounted_price < product.price %}
-                <del>${{ product.price }}</del>    
-                <p> ${{ product.discounted_price }}</p>
-                {% else %}
-                ${{ product.price }}
-                {% endif %}
+              
+                <del>${{ variation.price }}</del>    
+                <p> ${{ variation.offer_price }}</p>
+              
 
             </div>
             <div class="d-flex justify-content-between flex-lg-wrap">
-                  {% if product.stock <= 0 %}
+                  {% if variation.stock <= 0 %}
                     <a href="#" class="btn border border-danger rounded-pill px-3 text-danger">Out Of Stock</a>
 
                   {% else %}
-                  <a href="{% url 'cart:add_cart' product.id %}" class="btn border border-secondary rounded-pill px-3 text-dark"><i class="fa fa-shopping-bag me-2" style="color: #453454;"></i> Add to cart</a>
+                  <a href="{% url 'cart:add_cart' %}" class="btn border border-secondary rounded-pill px-3 text-dark"><i class="fa fa-shopping-bag me-2" style="color: #453454;"></i> Add to cart</a>
                   {% endif %}                                                
             </div>
           </div>
@@ -61,7 +69,7 @@
         <div class="border border-primary rounded position-relative vesitable-item">
             <div class="vesitable-img">
                 <a href="{{ i.get_url }}">
-                <img src="{{ i.first_variation_image.images.url  }}" class="img-fluid w-100 rounded-top" style="height: 200px; width: 300px;" alt="">
+                <img src="{{ i.first_variation_image.url  }}" class="img-fluid w-100 rounded-top" style="height: 200px; width: 300px;" alt="{{ product.product_name }}">
                 </a>
             </div>
             <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">{{i.category.brand_name}}</div>
@@ -71,7 +79,8 @@
                 </a>
                 <p></p>
                 <div class="d-flex justify-content-between flex-lg-wrap">
-                    <p class="text-dark fs-5 fw-bold">${{ i.price }}</p>
+                    <del>{{ i.first_variation_price }}</del>
+                    <p class="text-dark fs-5 fw-bold">{{  i.first_variation_offer_price  }}</p>
                     <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</a>
                 </div>
             </div>

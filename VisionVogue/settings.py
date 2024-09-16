@@ -65,7 +65,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google'
+    'allauth.socialaccount.providers.google', 
 ]
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -179,7 +179,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
 
 # media files configuration
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR /'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # email
 
@@ -210,12 +210,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Automatically skip the extra confirmation screen
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
+# Skip email verification step if you trust the provider (e.g., Google)
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-
-AUTHENTICATION_BACKENDS =(
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend"
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # default
+    'allauth.account.auth_backends.AuthenticationBackend',  # allauth
 )
 # login
 LOGIN_REDIRECT_URL = "/"

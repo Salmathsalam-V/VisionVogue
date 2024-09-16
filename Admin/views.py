@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -6,7 +7,7 @@ from Store . models import Product, Variation
 from carts.models import Coupon
 from . models import SalesReport
 from . forms import CategoryForm, CouponForm, ImageGalleryFormSet, ProductForm, VariationForm
-from Accounts . models import Account
+from Accounts . models import Account, Wallet
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -28,17 +29,45 @@ from django.db.models import Sum, Count, F
 from django.utils import timezone
 from datetime import datetime
 from django.views.generic import ListView, UpdateView, DeleteView
-
+import json
 
 def admin_dashboard(request):
+    # Get date filter (yearly, monthly, etc.)
+    period = request.GET.get('period', 'yearly')
+
+    # Filter data by period
+    today = datetime.today()
+    if period == 'yearly':
+        start_date = today.replace(month=1, day=1)  # Start of the year
+    elif period == 'monthly':
+        start_date = today.replace(day=1)  # Start of the month
+    elif period == 'weekly':
+        start_date = today - timedelta(days=today.weekday())  # Start of the week
+    else:
+        start_date = None
+
+    # Get sales data by category
+    category_sales = OrderProduct.objects.filter(order__created_at__gte=start_date).values(
+        'product__category__brand_name'
+    ).annotate(
+        total_sales=Sum(F('quantity') * F('product_price'))
+    ).order_by('-total_sales')
+
+    # For Chart.js, we need the data in JSON format
+    category_labels = [sale['product__category__brand_name'] for sale in category_sales]
+    category_data = [sale['total_sales'] for sale in category_sales]
+
     category_count = Category.objects.count()
     product_count = Product.objects.count()
-    recent_products = Product.objects.order_by('-id')[:5]
+    recent_products = Variation.objects.order_by('-id')[:5]
 
     context = {
         'category_count': category_count,
         'product_count': product_count,
         'recent_products': recent_products,
+        'category_labels': json.dumps(category_labels), 
+        'category_data': json.dumps(category_data),
+        'period': period,
     }
     return render(request, 'admin/dashboard.html', context)
 
@@ -266,22 +295,49 @@ def view_orders(request):
     return render(request, 'admin/view_orders.html', {'orders': orders})
 
 def update_order_status(request, order_id):
-    if request.user in Account.objects.filter(is_admin=True):
-        messages.error(request, "You do not have permission to update this order.")
-        return redirect('home')
-
+    # Ensure only admin can update the order status
     order = get_object_or_404(Order, id=order_id)
-
+    
     if request.method == 'POST':
         form = OrderStatusForm(request.POST, instance=order)
         if form.is_valid():
             previous_status = order.status
             updated_order = form.save(commit=False)
-
-            # Check if the status is being updated to 'Accepted'
+            print("%%%%%%%%%%%%%%%%%%")
+            print("this ",updated_order)
+            # If the status is changed to 'Accepted'
             if updated_order.status == 'Accepted' and previous_status != 'Accepted':
                 updated_order.delivery_date = timezone.now() + timedelta(days=10)
-            
+            payment=Payment.objects.get(order=order.id)
+            print(payment)
+            if updated_order.status == 'Cancelled':
+                # Loop through each product in the order and restore stock
+                order_products = OrderProduct.objects.filter(order=updated_order)
+                for i in order_products:
+                    print("order product",i.variation.id) 
+                    print(i.variation.stock)               
+                    i.variation.stock += i.quantity
+                    i.save()
+                    print(i.variation.stock)
+                print("payment",payment)
+                # if payment.status == 'Completed':
+                #     wallet=Wallet.objects.get(user=order.user)
+                #     print(wallet.balance)
+                #     wallet.balance += Decimal(order.order_total)
+                #     print(wallet.balance)
+                #     wallet.save()
+                #     messages.success(request, 'The amount transfered into users wallet!')
+
+                    # variation = Variation.objects.filter(variation=order_products.variation)
+                # print(variation,"********")
+                # for order_product in order_products:
+                #     # Update the stock of the product
+                #     product = order_product.product
+                #     for i in variation:
+                #         if product.variation == i:
+                #             i.stock += order_product.quantity
+                #             i.save()
+                #     product.save()
             updated_order.save()
             messages.success(request, 'Order status updated successfully!')
             return redirect('myadmin:view_orders')
@@ -343,7 +399,7 @@ def sales_report(request):
     end_date = request.GET.get('end_date')
     period = request.GET.get('period')
     orders = Order.objects.all()
-    
+
     # Custom date filtering
     if period == '' and start_date and end_date:
         try:
@@ -353,7 +409,7 @@ def sales_report(request):
             orders = orders.filter(created_at__range=[start_date, end_date])
         except ValueError:
             raise ValidationError("Invalid date format. Dates must be in YYYY-MM-DD format.")
-    
+
     # Aggregation based on period
     if period == 'daily':
         orders = orders.filter(created_at__date=timezone.now().date())
@@ -365,18 +421,21 @@ def sales_report(request):
         # Custom date range already handled above
         pass
 
-    # Aggregate the data based on filtered orders
-    data = orders.values('orderproduct__product__product_name').annotate(
+    # Aggregate the data based on filtered orders, focusing on product variations
+    data = orders.values(
+        'orderproduct__variation__variation_value',  # Get variation value (e.g., color)
+        'orderproduct__variation__product__product_name',  # Get product name
+        'orderproduct__variation__price',  # Get the price of the variation
+        'orderproduct__variation__offer_price',  # Get the offer price of the variation
+    ).annotate(
         total_quantity=Sum('orderproduct__quantity'),
         total_sales=Sum(F('orderproduct__quantity') * F('orderproduct__product_price')),
-        total_discount=Sum('discount_amount'),
-        sub_total=Sum('sub_total')
-    ).order_by('orderproduct__product__product_name')
-  
+        total_discount=Sum(F('orderproduct__variation__price') - F('orderproduct__variation__offer_price')),  # Calculate discount as price - offer_price
+    ).order_by('orderproduct__variation__product__product_name')
+
     total_sales = data.aggregate(Sum('total_sales'))['total_sales__sum'] or 0
     total_orders = orders.count()
     total_discount = orders.aggregate(Sum('discount_amount'))['discount_amount__sum'] or 0
-    sub_total = orders.aggregate(Sum('sub_total'))['sub_total__sum'] or 0
 
     context = {
         'data': data,
@@ -384,17 +443,17 @@ def sales_report(request):
         'total_sales': total_sales,
         'total_orders': total_orders,
         'total_discount': total_discount,
-        'sub_total': sub_total,
         'period': period,
         'start_date': start_date if start_date else None,
         'end_date': end_date if end_date else None,
     }
-    
+
+    # Handle export options
     if 'export_pdf' in request.GET:
         return generate_pdf('admin/sales_report_pdf.html', context)
     elif 'export_excel' in request.GET:
         return generate_excel(data)
-    
+
     return render(request, 'admin/sales_report.html', context)
 
 def generate_pdf(template_src, context):
@@ -419,8 +478,8 @@ def generate_excel(data):
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    # Define the columns for the Excel sheet
-    columns = ['Item Name', 'Quantity Sold', 'Total Discount', 'Total Sales', 'Sub Total']
+    # Define the columns for the Excel sheet, ensuring they match your sales report data
+    columns = ['Product Name', 'Variation', 'Quantity Sold', 'Price', 'Offer Price', 'Discount', 'Total Sales', 'Sub Total']
 
     for col_num in range(len(columns)):
         ws.write(row_num, col_num, columns[col_num], font_style)
@@ -428,14 +487,18 @@ def generate_excel(data):
     # Sheet body
     font_style = xlwt.XFStyle()
 
-    # Writing data from the sales report
+    # Writing data from the sales report view to the Excel file
     for item in data:
         row_num += 1
-        ws.write(row_num, 0, item['orderproduct__product__product_name'], font_style)
-        ws.write(row_num, 1, item['total_quantity'], font_style)
-        ws.write(row_num, 2, item['total_discount'], font_style)
-        ws.write(row_num, 3, item['total_sales'], font_style)
-        ws.write(row_num, 4, item['sub_total'], font_style)
+        # Writing each column based on your aggregated data fields
+        ws.write(row_num, 0, item['orderproduct__variation__product__product_name'], font_style)  # Product name
+        ws.write(row_num, 1, item['orderproduct__variation__variation_value'], font_style)  # Variation (e.g., color/size)
+        ws.write(row_num, 2, item['total_quantity'], font_style)  # Quantity sold
+        ws.write(row_num, 3, item['orderproduct__variation__price'], font_style)  # Price
+        ws.write(row_num, 4, item['orderproduct__variation__offer_price'], font_style)  # Offer price
+        ws.write(row_num, 5, item['total_discount'], font_style)  # Total discount
+        ws.write(row_num, 6, item['total_sales'], font_style)  # Total sales
+        ws.write(row_num, 7, item['sub_total'], font_style)  # Sub total
 
     wb.save(response)
     return response
@@ -447,3 +510,65 @@ def view_saved_reports(request):
 def return_list(request):
     returns = Return.objects.all()  # Fetch all Return objects
     return render(request, 'admin/return_list.html', {'returns': returns})
+
+def top_selling_products_and_categories(request):
+    # Top 10 best-selling products based on the total quantity sold
+    top_products = OrderProduct.objects.values(
+        'variation__product__product_name',  # Get the product name
+        'variation__product__category__brand_name',  # Get the product's category name
+    ).annotate(
+        total_quantity_sold=Sum('quantity'),
+        total_sales=Sum(F('quantity') * F('product_price')),
+    ).order_by('-total_quantity_sold')[:10]  # Limit to the top 10
+
+    # Top 10 best-selling categories based on the total quantity of all products in the category sold
+    top_categories = OrderProduct.objects.values(
+        'product__category__brand_name',  # Get the category name
+    ).annotate(
+        total_quantity_sold=Sum('quantity'),
+        total_sales=Sum(F('quantity') * F('product_price')),
+    ).order_by('-total_quantity_sold')[:10]  # Limit to the top 10
+
+    context = {
+        'top_products': top_products,
+        'top_categories': top_categories,
+    }
+
+    return render(request, 'admin/top_selling.html', context)
+
+def ledger_view(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    transactions = Payment.objects.select_related('order', 'user').all()
+
+    if start_date and end_date:
+        try:
+            start_date = timezone.make_aware(datetime.strptime(start_date, '%Y-%m-%d'))
+            end_date = timezone.make_aware(datetime.strptime(end_date, '%Y-%m-%d'))
+            transactions = transactions.filter(created_at__range=[start_date, end_date])
+        except ValueError:
+            raise ValidationError("Invalid date format. Use YYYY-MM-DD.")
+    return_ = Return.objects.all()
+    ledger_data = transactions.values(
+        'payment_id',
+        'user__username',
+        'order__order_number',
+        'payment_method',
+        'amount_paid',
+        'status',
+        'created_at',
+        'order__status',
+    ).order_by('-created_at')
+
+    total_amount = transactions.aggregate(total=Sum(F('amount_paid')))['total'] or 0
+
+    context = {
+        'ledger_data': ledger_data,
+        'total_amount': total_amount,
+        'start_date': start_date,
+        'end_date': end_date,
+        'return_':return_
+    }
+
+    return render(request, 'admin/ledger_book.html', context)

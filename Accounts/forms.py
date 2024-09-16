@@ -40,7 +40,7 @@ class ProfileForm(forms.ModelForm):
         super(ProfileForm, self).__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
-
+        self.fields['email'].widget.attrs['readonly'] = True
 
 class AddressForm(forms.ModelForm):
     class Meta:

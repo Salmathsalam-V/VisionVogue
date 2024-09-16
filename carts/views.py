@@ -7,6 +7,8 @@ from .models import Cart, CartItem, Coupon, UserCoupon
 from django.core.exceptions import ObjectDoesNotExist
 import json
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
 
 # Create your views here.
 def _cart_id(request):
@@ -70,38 +72,44 @@ def update_cart(request):
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-def add_cart(request, variation_id):
+@csrf_exempt
+def add_cart(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
     # Get the variation based on the provided variation_id
-    variation = get_object_or_404(Variation, id=variation_id)
-    product = variation.product  # Get the product associated with the variation
-    print(variation)
+    if request.POST:
+        variant_id = request.POST.get("variation")
+    else: 
+        variant_id = request.GET.get("variation_id")
+    print(variant_id)
+    variant_id=Variation.objects.get(id=variant_id)
+    product = variant_id.product  # Get the product associated with the variation
+    print(variant_id)
     # Get or create the cart for the current user
     cart, created = Cart.objects.get_or_create(user_id=request.user)
     cart.save()
 
     # Check if the cart item with the same variation already exists
     cart_item = CartItem.objects.filter(
-        cart=cart, variation=variation
+        cart=cart, variation=variant_id
     ).first()
     print(cart_item,"cartitem is none")
     if cart_item:
         print(cart_item,"*****************")
         # Increment quantity if less than 5 and less than variation stock
-        if cart_item.quantity < 5 and cart_item.quantity < variation.stock:
+        if cart_item.quantity < 5 and cart_item.quantity < variant_id.stock:
             cart_item.quantity += 1
             cart_item.save()
             messages.success(request, 'Quantity updated in the cart.')
         else:
-            messages.error(request, 'You cannot add more than 5 of this product.')
+            messages.error(request, 'Product is out of Stock or You try to add more than 5.')
     else:
         # Add a new cart item if it doesn't exist
         cart_item = CartItem.objects.create(
             product=product,
             cart=cart,
-            variation=variation,
+            variation=variant_id,
             quantity=1
         )
         cart_item.save()

@@ -4,7 +4,7 @@ from . models import ImageGallery, Product, Variation
 
 class ImageGalleryInline(admin.TabularInline):
     model = ImageGallery
-    extra = 1  # Number of empty image fields to display
+    extra = 2  # Number of empty image fields to display
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('product_name',  'category', 'modified_date', 'is_available','is_delete','features','frame_model','sex')

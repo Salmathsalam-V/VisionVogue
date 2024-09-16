@@ -37,10 +37,35 @@
             "color": "#3399cc"
         }
     };
+
     var rzp1 = new Razorpay(options);
+
     rzp1.on('payment.failed', function (response){
-        alert(response.error.description);
+        console.log("Payment Failed: " + response.error.description);
+        
+        // Perform an AJAX request to update payment status to "Pending"
+        var order_id = "{{ order.id }}";
+        var csrf_token = "{{ csrf_token }}";  // CSRF token for the request
+        console.log("before fetch")
+        fetch("{% url 'payment_failed' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrf_token,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                "order_id": order_id,
+                "error_description": response.error.description
+            }),
+        }).then(function (response) {
+            return response.json();
+        }).then(function (data) {
+            console.log("Payment status updated to Pending.");
+        }).catch(function (error) {
+            console.error("Error updating payment status:", error);
+        });
     });
+
     document.getElementById('rzp-button').onclick = function(e){
         rzp1.open();
         e.preventDefault();

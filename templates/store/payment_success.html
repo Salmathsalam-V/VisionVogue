@@ -23,6 +23,7 @@
         <a href="{% url 'wallet' %}" class="btn btn-dark mt-4">Wallet</a>
         {% endif %}
         <!-- <p><strong>Payment Method:</strong> {{ payment_method }}</p> -->
+        <a href="{% url 'generate_invoice_pdf' order.id %}" class="btn btn-dark mt-4">Download Invoice PDF</a>
         <a href="{% url 'orders' %}" class="btn btn-primary mt-4">View Your Orders</a>
         <a href="{% url 'home' %}" class="btn btn-secondary mt-4">Continue Shopping</a>
     </div>

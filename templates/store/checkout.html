@@ -20,7 +20,7 @@
         </div>
           
         {% endfor %}
-        <div class="container-fluid py-5">
+        <div class="container-fluid py-1">
             <div class="container py-5">
                 <h1 class="mb-4">Billing details</h1>
 
@@ -51,10 +51,7 @@
                             <!-- Empty column for spacing -->
                         </div>
                         <div class="col-6">
-                            <div class="form-check my-3">
-                                <input class="form-check-input" type="checkbox" id="Address-1" name="ship_to_different_address" value="yes">
-                                <label class="form-check-label" for="Address-1">Ship to a different address?</label>
-                            </div>
+                            
 
                             <!-- Cart items table -->
                             <div class="table-responsive">
@@ -64,6 +61,7 @@
                                             <th scope="col">Products</th>
                                             <th scope="col">Name</th>
                                             <th scope="col">Price</th>
+                                            <th scope="col">Offer Price</th>
                                             <th scope="col">Quantity</th>
                                             <th scope="col">Total</th>
                                         </tr>
@@ -73,15 +71,18 @@
                                         <tr>
                                             <th scope="row">
                                                 <div class="d-flex align-items-center">
-                                                    <a href="{{ cart_item.product.get_url }}"><img src="{{ cart_item.product.images.url }}" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt=""></a>
+                                                    <a href="{{ cart_item.product.get_url }}"><img src="{{ cart_item.variation.images.url }}" class="img-fluid me-5 rounded-circle" style="width: 80px; height: 80px;" alt=""></a>
                                                 </div>
                                             </th>
                                             <td>
                                                 <p class="mb-0 mt-4">{{ cart_item.product.product_name }}</p>
-                                                <p>{{ cart_item.product.category.brand_name }} - {{ cart_item.product.color }}</p>
+                                                <p>{{ cart_item.product.category.brand_name }} - {{ cart_item.variation.variation_value }}</p>
                                             </td>
                                             <td>
-                                                <p class="mb-0 mt-4">{{ cart_item.product.price }}</p>
+                                                <p class="mb-0 mt-4">{{ cart_item.variation.price }}</p>
+                                            </td>
+                                            <td>
+                                                <p class="mb-0 mt-4">{{ cart_item.variation.offer_price }}</p>
                                             </td>
                                             <td>
                                                 <div class="input-group quantity mt-4" style="width: 100px;">
@@ -100,14 +101,13 @@
                                             </td>
                                             <td class="py-2"> 
                                                 <div class="py-2 border-bottom border-top">
-                                                <p class="mb-0 text-dark">{{sub_total}}</p></div></td>
+                                                <p class="mb-0 text-dark"> {{total}} </p></div></td>
                                         </tr>
                                         <tr>
                                             <th scope="row"></th>
                                             
-                                            <td colspan="3" class="py-5">
+                                            <td colspan="3" class="py-2">
                                                 <div class="form-check text-start">
-                                                    <input type="checkbox" class="form-check-input bg-primary border-0" id="Shipping-1" name="Shipping-1" value="Shipping">
                                                     <label class="form-check-label" for="Shipping-1">Shipping : $ 100</label>
                                                 </div>
                                         
@@ -160,12 +160,6 @@
                             <div class="row g-4 text-center align-items-center justify-content-center border-bottom py-2">
                                 <div class="col-12">
                                     <div class="form-check text-start my-2">
-                                        <input type="radio" class="form-check-input bg-primary border-0" id="PaymentCOD" name="payment_method" value="COD">
-                                        <label class="form-check-label" for="PaymentCOD">Cash On Delivery</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check text-start my-2">
                                         <input type="radio" class="form-check-input bg-primary border-0" id="PaymentWallet" name="payment_method" value="Wallet">
                                         <label class="form-check-label" for="PaymentWallet">Wallet</label>
                                     </div>
@@ -176,21 +170,30 @@
                                         <label class="form-check-label" for="PaymentRazorpay">Razorpay</label>
                                     </div>
                                 </div>
+                                {% if grand_total <= 1000 %}
+                                <div class="col-12">
+                                    <div class="form-check text-start my-2">
+                                        <input type="radio" class="form-check-input bg-primary border-0" id="PaymentCOD" name="payment_method" value="COD">
+                                        <label class="form-check-label" for="PaymentCOD">Cash On Delivery</label>
+                                    </div>
+                                </div>
+                                {% endif %}
                             </div>
 
                             <!-- Confirm Order Button (COD) -->
-                            <div id="confirmCOD" class="row g-4 text-center align-items-center justify-content-center pt-4" style="display:none;">
-                                <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
-                            </div>
+<div id="confirmCOD" class="row g-4 text-center align-items-center justify-content-center pt-4" style="display:none;">
+    <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Place Order</button>
+</div>
 
-                            <!-- Razorpay Payment Button -->
-                            <div id="razorpayOptions" class="row g-4 text-center align-items-center justify-content-center pt-4" style="display:none;">
-                                <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Pay Now</button>
-                            </div>
-                            <!-- wallet -->
-                            <div id="walletOptions" class="row g-4 text-center align-items-center justify-content-center pt-4" style="display:none;">
-                                <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Pay with Wallet</button>
-                            </div>
+<!-- Razorpay Payment Button -->
+<div id="razorpayOptions" class="row g-4 text-center align-items-center justify-content-center pt-4" style="display:none;">
+    <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Pay Now</button>
+</div>
+
+<!-- Wallet Payment Button -->
+<div id="walletOptions" class="row g-4 text-center align-items-center justify-content-center pt-4" style="display:none;">
+    <button type="submit" class="btn border-secondary py-3 px-4 text-uppercase w-100 text-primary">Pay with Wallet</button>
+</div>
 
                         
                         </div>
@@ -200,26 +203,29 @@
             </div>
         </div>
         <!-- Checkout Page End -->
-<script>
-        document.getElementById('PaymentCOD').addEventListener('change', function() {
-            document.getElementById('confirmCOD').style.display = 'block';
-            document.getElementById('razorpayOptions').style.display = 'none';
-            document.getElementById('walletOptions').style.display = 'none';
-        });
-
-        document.getElementById('PaymentWallet').addEventListener('change', function() {
-        document.getElementById('confirmCOD').style.display = 'none';
-        document.getElementById('razorpayOptions').style.display = 'none';
-        document.getElementById('walletOptions').style.display = 'block';
-        });
-
-        document.getElementById('PaymentRazorpay').addEventListener('change', function() {
-            document.getElementById('confirmCOD').style.display = 'none';
-            document.getElementById('razorpayOptions').style.display = 'block';
-            document.getElementById('walletOptions').style.display = 'none';
-        });
+        <script>
+            document.getElementById('PaymentWallet').addEventListener('change', function() {
+                document.getElementById('confirmCOD').style.display = 'none';
+                document.getElementById('razorpayOptions').style.display = 'none';
+                document.getElementById('walletOptions').style.display = 'block';
+            });
         
-</script>
+            document.getElementById('PaymentRazorpay').addEventListener('change', function() {
+                document.getElementById('confirmCOD').style.display = 'none';
+                document.getElementById('razorpayOptions').style.display = 'block';
+                document.getElementById('walletOptions').style.display = 'none';
+            });
+        
+            // Check if COD button exists before attaching event listener
+            const paymentCOD = document.getElementById('PaymentCOD');
+            if (paymentCOD) {
+                paymentCOD.addEventListener('change', function() {
+                    document.getElementById('confirmCOD').style.display = 'block';
+                    document.getElementById('razorpayOptions').style.display = 'none';
+                    document.getElementById('walletOptions').style.display = 'none';
+                });
+            }
+        </script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     var options = {

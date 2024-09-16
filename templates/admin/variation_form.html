@@ -1,16 +1,95 @@
 {% extends 'admin/base.html' %}
 {% block content %}
 <h2>{{ variation.product }} - Edit Variation</h2>
+<h2>Variation</h2>
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
 
     <h3>Upload Images</h3>
-    {{ formset.management_form }}
-    {% for form in formset %}
-        {{ form.as_p }}
-    {% endfor %}
+    <div class="col-md-4">
+        <label for="{{ form.images.id_for_label }}">Variation Image</label>
+        <input type="file" id="{{ form.images.id_for_label }}" name="{{ form.images.name }}" style="display: none;">
+        <button type="button" onclick="document.getElementById('{{ form.images.id_for_label }}').click();" class="btn btn-primary">Select Image</button>
+    </div>
+
+    <!-- Cropping Area for Variation Images -->
+    <div id="image-box-variation_images" class="image-crop-area"></div>
+    <img id="preview-variation-images" src="{{ form.images.value.url }}" alt="Image Preview" style="{% if form.images.value %}display:block{% else %}display:none{% endif %};">
+    <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-variation_images">Crop & Upload</button>
+
     <button type="submit">Save</button>
     <a href="{% url 'myadmin:variation_list' %}">Cancel</a>
 </form>
+
+<style>
+    .image-crop-area {
+        width: 300px; /* Adjust the display size */
+        height: 200px;
+        margin-top: 10px;
+        border: 2px dashed #ccc;
+        position: relative;
+    }
+    .image-crop-area img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+
+<!-- JavaScript for image cropping -->
+<script>
+    function setupCropper(inputId, imageBoxId, confirmBtnId) {
+        const input = document.getElementById(inputId);
+        const imageBox = document.getElementById(imageBoxId);
+        const confirmBtn = document.getElementById(confirmBtnId);
+        const csrf = document.getElementsByName('csrfmiddlewaretoken');
+
+        input.addEventListener('change', () => {
+            confirmBtn.classList.remove('not-visible');
+            const img_data = input.files[0];
+            const url = URL.createObjectURL(img_data);
+
+            imageBox.innerHTML = `<img src="${url}" id="image-${inputId}" class="croppable-image">`;
+            var $image = $(`#image-${inputId}`);
+            $image.cropper({
+                aspectRatio: 16 / 9,
+                viewMode: 1,  // This fixes the image, allowing only the cropping box to move
+                dragMode: 'move',  // Allows moving the cropping box only
+                crop: function(event) {
+                    // Handle cropping events if needed
+                }
+            });
+
+            var cropper = $image.data('cropper');
+            confirmBtn.addEventListener('click', () => {
+                cropper.getCroppedCanvas().toBlob((blob) => {
+                    console.log('confirmed');
+                    const fd = new FormData();
+                    fd.append('csrfmiddlewaretoken', csrf[0].value);
+                    fd.append(inputId, blob, `${inputId}-cropped.png`);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: window.location.href,
+                        enctype: 'multipart/form-data',
+                        data: fd,
+                        success: function(response) {
+                            console.log('success', response);
+                        },
+                        error: function(error) {
+                            console.log('error', error);
+                        },
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                    });
+                });
+            });
+        });
+    }
+
+    setupCropper('id_images', 'image-box-variation_images', 'confirm-btn-variation_images');
+</script>
 {% endblock %}

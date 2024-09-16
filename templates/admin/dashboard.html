@@ -1,13 +1,24 @@
 {% extends 'admin/base.html' %}
 {% block content %}
 <h2>Admin Dashboard</h2>
+
+<!-- Filter for period (yearly, monthly, weekly) -->
+<form method="GET" class="mb-4">
+    <label for="period">Select Period:</label>
+    <select name="period" id="period" onchange="this.form.submit()">
+        <option value="yearly" {% if period == 'yearly' %}selected{% endif %}>Yearly</option>
+        <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
+        <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
+    </select>
+</form>
+
 <div class="row">
     <div class="col-md-4">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Summary</h5>
-                <p class="card-text">Total Categories: {{ category_count }}</p>
-                <p class="card-text">Total Products: {{ product_count }}</p>
+                <p>Total Categories: {{ category_count }}</p>
+                <p>Total Products: {{ product_count }}</p>
             </div>
         </div>
     </div>
@@ -17,7 +28,8 @@
                 <h5 class="card-title">Recent Products</h5>
                 <ul class="list-group">
                     {% for product in recent_products %}
-                    <li class="list-group-item">{{ product.product_name }} - ${{ product.price }}  <img src="{{ product.images.url }}" class="img-fluid rounded-top" alt="" style="height: 50px; width: 50px;">
+                    <li class="list-group-item">
+                        {{ product.product_name }} - Price: ${{ product.price }} - Offer Price: ${{ product.offer_price }}
                     </li>
                     {% endfor %}
                 </ul>
@@ -25,36 +37,31 @@
         </div>
     </div>
 </div>
+
 <div class="row mt-4">
     <div class="col">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Product Category Distribution</h5>
+                <h5 class="card-title">Product Category Sales Distribution</h5>
                 <canvas id="categoryChart"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    $(document).ready(function() {
+    document.addEventListener('DOMContentLoaded', function() {
         var ctx = document.getElementById('categoryChart').getContext('2d');
         var categoryChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Category 1', 'Category 2', 'Category 3'],  // Update these labels
+                labels: {{ category_labels|safe }},
                 datasets: [{
-                    label: 'Products',
-                    data: [10, 20, 30],  // Update these data points
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.2)',
-                        'rgba(54, 162, 235, 0.2)',
-                        'rgba(255, 206, 86, 0.2)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)'
-                    ],
+                    label: 'Total Sales',
+                    data: {{ category_data|safe }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
             },

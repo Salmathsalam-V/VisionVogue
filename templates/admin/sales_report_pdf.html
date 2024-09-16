@@ -30,20 +30,25 @@
         <thead>
             <tr>
                 <th>Item Name</th>
-              <th>Quantity Sold</th>
-              <th>Total Discount</th>
-              <th>Total Sales</th>
-              <th>Total</th>
+                <th>Variation Value</th>  <!-- New column for Variation Value -->
+                <th>Price</th>
+                <th>Offer Price</th>
+                <th>Quantity Sold</th>
+                <th>Total Discount</th>
+                <th>Total Sales</th>
+                
             </tr>
         </thead>
         <tbody>
             {% for item in data %}
             <tr>
-                <td>{{ item.orderproduct__product__product_name }}</td>
-                <td>{{ item.total_quantity }}</td>
-                <td>{{ item.total_discount }}</td>
-                <td>{{ item.sub_total }}</td>
-                <td>{{ item.total_sales }}</td>
+                <td>{{ item.orderproduct__variation__product__product_name }}</td> <!-- Product name -->
+                <td>{{ item.orderproduct__variation__variation_value }}</td> <!-- Variation value -->
+                <td>{{ item.orderproduct__variation__price }}</td>
+                <td>{{ item.orderproduct__variation__offer_price }}</td>
+                <td>{{ item.total_quantity }}</td> <!-- Total quantity sold -->
+                <td>{{ item.total_discount }}</td> <!-- Total discount -->
+                <td>{{ item.total_sales }}</td> <!-- Total sales -->
             </tr>
             {% endfor %}
         </tbody>

@@ -74,57 +74,85 @@
                                 
                               </div>
                           </div>
-                      </div>
+                    </div>
                 </div>
                 <div class="row col-12 g-4">
                     <div class="row ">
                         <div class="col-lg-3 g-4">
                             <div class="col-lg-12">
+                                <!-- Clear All Filters Button -->
+                                <div class="mb-3">
+                                    <a href="{% url 'store:store' %}" class="btn btn-secondary">Clear All Filters</a>
+                                </div>
+
                                 <div class="mb-3">
                                     <h4>Brands</h4>
-                                    <ul class="list-unstyled fruite-categorie">
-                                    <li>
-                                        <div class="d-flex justify-content-between fruite-name">
-                                            <a href="{% url 'store:store' %}">All the product</a>
-                                        </div>
-                                    </li>
-                                    {% for category in links %}  
-                                    {% if category.is_delete %}
-                                    {% else %}                        
-                                        <li>
-                                            <div class="d-flex justify-content-between fruite-name">
-                                                <a href="{{ category.get_url }}"><i class="bi bi-sunglasses text-dark"></i> - {{ category.brand_name }} </a>
-                                            </div>
-                                        </li>
-                                    {% endif %}
-                                    {% endfor %}
-                                        
+                                    <form method="GET" action="{% url 'store:store' %}" id="brand-filter-form">
+                                        <ul class="list-unstyled fruite-categorie">
+                                            <li>
+                                                <div class="d-flex justify-content-between fruite-name">
+                                                    <label>
+                                                        <input type="checkbox" name="brands" value="all" 
+                                                            {% if 'all' in selected_brands %} checked {% endif %}> 
+                                                        All the product
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            {% for category in links %}  
+                                                {% if not category.is_delete %}                        
+                                                    <li>
+                                                        <div class="d-flex justify-content-between fruite-name">
+                                                            <label>
+                                                                <input type="checkbox" name="brands" value="{{ category.brand_name }}" 
+                                                                    {% if category.brand_name in selected_brands %} checked {% endif %}> 
+                                                                <i class="bi bi-sunglasses text-dark"></i> - {{ category.brand_name }}
+                                                            </label>
+                                                        </div>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </ul>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="col-lg-12">
-                            <div class="mb-3">
-                                <h4 class="mb-2">Sex</h4>
-                                <form method="get" id="sexForm">
-                                    <input type="hidden" name="additional_sort" value="{{ additional_sort }}">
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-4" name="sex" value="none" {% if sex_filter == 'none' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-4">All</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-1" name="sex" value="male" {% if sex_filter == 'male' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-1">Men</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-2" name="sex" value="female" {% if sex_filter == 'female' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-2">Women</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-3" name="sex" value="unisex" {% if sex_filter == 'unisex' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-3">Unisex</label>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+
+<!-- Frame Model Multiple Selection -->
+<div class="mb-3">
+    <h4 class="mb-2">Frame Model</h4>
+    <form method="GET" action="{% url 'store:store' %}" id="frame-model-form">
+        <ul class="list-unstyled">
+            {% for model, label in frame_model_choices %}
+            <li>
+                <label>
+                    <input type="checkbox" name="frame_model" value="{{ model }}" 
+                        {% if model in selected_frame_models %}checked{% endif %}>
+                    {{ label }}
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+    </form>
+</div>
+
+<!-- Sex Multiple Selection -->
+<div class="mb-3">
+    <h4 class="mb-2">Sex</h4>
+    <form method="GET" action="{% url 'store:store' %}" id="sex-form">
+        <ul class="list-unstyled">
+            {% for value, label in sex_choices %}
+            <li>
+                <label>
+                    <input type="checkbox" name="sex" value="{{ value }}" 
+                        {% if value in selected_sexes %}checked{% endif %}>
+                    {{ label }}
+                </label>
+            </li>
+            {% endfor %}
+        </ul>
+    </form>
+</div>
+
+
                         <div class="col-lg-12">
                             <div class="mb-3">
                                 <h4>Additional</h4>
@@ -194,55 +222,63 @@
                                 <span>Found <b>{{product_count}}</b> items</span>
                                 {% if products %}
                                 {% for product in products %}
-                                  <div class="col-md-6 col-lg-6 col-xl-4">
-                                      <div class="rounded position-relative fruite-item">
-                                          <div class="fruite-img">
-                                            <a href="{{ product.get_url }}"> 
-                                            <img src="{{ product.first_variation_image.images.url }}" class="img-fluid w-100 rounded-top" alt="" style="height: 200px; width: 300px;">
-                                            </a> 
-                                          </div>
-                                          <div class="text-white px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #453454;">{{ product.category.brand_name }}</div>
-                                          <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                              <a href="{{ product.get_url }}"><h4>{{ product.product_name }}</h4></a>
-                                              <div class="rating-box">
-                                                {{ product.average_rating }}
-                                                 <i class="fa fa-star selected"></i>
-                                            </div>
-                                            {% if product in wishlist %}
-                                                <!-- If the product is already in the wishlist, show a filled heart icon -->
-                                                <a href="{% url 'store:remove_from_wishlist' product.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
-                                                    <i class="fa-solid fa-heart" style="color: #ff0000;"></i>                                           
-                                                </a>
-                                            {% else %}
-                                                <!-- If the product is not in the wishlist, show an empty heart icon -->
-                                                <a href="{% url 'store:add_to_wishlist' product.id %}" title="Add to Wishlist" onclick="addToWishlist(event, this.href)">
-                                                    <i class="far fa-heart"></i>
-                                                </a>
-                                            {% endif %}
+        <div class="col-md-6 col-lg-6 col-xl-4">
+            <div class="rounded position-relative fruite-item d-flex flex-column " style="height: 400px; margin-top: 2px">
+                <div class="fruite-img" style="height: 200px;">
+                    <a href="{{ product.get_url }}">
+                        {% if product.first_variation_image %}
+                            <img src="{{ product.first_variation_image.images.url }}" class="img-fluid w-100 rounded-top" alt="" style="height: 200px;">
+                        {% else %}
+                            <img src="{% static 'images/default.jpg' %}" class="img-fluid w-100 rounded-top" alt="No Image" style="height: 200px;">
+                        {% endif %}
+                    </a>
+                </div>
+                <div class="text-white px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px; background-color: #453454;">{{ product.category.brand_name }}</div>
+                <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                    <a href="{{ product.get_url }}"><h4>{{ product.product_name }}</h4></a>
+                    <div class="rating-box">
+                        {{ product.average_rating }}
+                        <i class="fa fa-star selected"></i>
+                    </div>
+    
+                    {% if user.is_authenticated %}
+    {% if product.active_variations %}
+        {% with first_variation=product.active_variations.0 %}
+            {% if first_variation.id in wishlist %}
+                <!-- If the first variation is already in the wishlist, show a filled heart icon -->
+                <a href="{% url 'store:remove_from_wishlist' first_variation.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
+                    <i class="fa-solid fa-heart" style="color: #ff0000;"></i>
+                </a>
+            {% else %}
+                <!-- If the first variation is not in the wishlist, show an empty heart icon -->
+                <a href="{% url 'store:add_to_wishlist' first_variation.id %}" title="Add to Wishlist" onclick="addToWishlist(event, this.href)">
+                    <i class="far fa-heart"></i>
+                </a>
+            {% endif %}
+            <!-- <p>{{ first_variation.color }}</p> -->
+    
+                    <div class="d-flex justify-content-between flex-lg-wrap">
+                        {% if product.get_offer_price < product.get_price %}
+                            <p><del>{{ product.get_price }}</del></p>
+                            <p>MRP {{ product.get_offer_price }}</p>
+                        {% endif %}
+                    </div>
+    
+                    <div class="d-flex justify-content-between flex-lg-wrap">
+                        {% if first_variation.stock <= 0 %}
+                            <h4 class="text-danger">Out of Stock</h4>
+                        {% else %}
+                            <a href="#" class="btn border border-secondary rounded-pill px-3 text-dark">Available</a>
+                        {% endif %}
+                    </div>
+        {% endwith %}
+    {% endif %}
+{% endif %}
 
-                                              <p>{{product.color}}</p>
-                                              <div class="d-flex justify-content-between flex-lg-wrap">
-                                                
-                                                {% if product.get_offer_price < product.get_price %}
-                                                <del>${{ product.get_price }}</del>    
-                                                <p> ${{ product.get_offer_price }}</p>
-                                                {% else %}
-                                                <p>${{ product.get_price }}</p>
-                                                {% endif %}
-
-                                            </div>
-                                            <div class="d-flex justify-content-between flex-lg-wrap">
-                                                  {% if product.stock <= 0 %}
-                                                    <a href="#" class="btn border border-danger rounded-pill px-3 text-danger">Out Of Stock</a>
-
-                                                  {% else %}
-                                                  <a href="{% url 'cart:add_cart' product.id %}" class="btn border border-secondary rounded-pill px-3 text-dark"><i class="fa fa-shopping-bag me-2" style="color: #453454;"></i> Add to cart</a>
-                                                  {% endif %}                                                
-                                            </div>
-                                          </div>
-                                      </div>
-                                  </div>
-                                  {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
 
                             </div>
                         </div>
@@ -319,6 +355,31 @@
             });
         }
     </script>  
+    
+    <script>
+        // Auto-submit brand form
+        document.querySelectorAll('#brand-filter-form input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                document.getElementById('brand-filter-form').submit();
+            });
+        });
+    
+        // Auto-submit frame model form
+        document.querySelectorAll('#frame-model-form input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                document.getElementById('frame-model-form').submit();
+            });
+        });
+    
+        // Auto-submit sex form
+        document.querySelectorAll('#sex-filter-form input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                document.getElementById('sex-filter-form').submit();
+            });
+        });
+    </script>    
+ 
+ 
 <style>
                     
         .product-rating .fa-star {

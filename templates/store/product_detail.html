@@ -67,8 +67,6 @@
                             </div>
                             
                             <div class="col-lg-4 col-xl-3">
-                                <form action="{% url 'cart:add_cart' default_variation.id %}" method="POST" id="add-to-cart-form">
-                                    {% csrf_token %}
                                         <h4 class="fw-bold mb-3">{{ single_product.product_name }}</h4>
                                         <p class="mb-3">Brand: {{ single_product.category.brand_name }}</p>
                                         <p class="mb-3"> {{ single_product.sex }}</p>
@@ -77,7 +75,7 @@
                                             
                                                 <h5 class="fw-bold mb-3"> {{ single_product.price }}</p>
                                         <p class="mb-3">Features: {{ single_product.features }}</p>
-
+                                        <p class="mb-3">Frame: {{ single_product.frame_model }}</p>
                                         <div class="rating-box">
                                             {{ single_product.average_rating}}<i class="fa fa-star selected"></i>
                                         </div>
@@ -89,9 +87,9 @@
                                             <hr>
                                             <div class="row">
                                                 <p class="mb-3">Colour: 
-                                                    <form action="{% url 'cart:add_cart' single_product.id %}" method="POST" id="variant-form">
+                                                    <form action="{% url 'cart:add_cart' %}" method="POST" id="variant-form">
                                                         {% csrf_token %}
-                                                    <select name="color" class="form-control" required id="color-select">
+                                                    <select name="variation" class="form-control" required id="color-select">
                                                         {% for variation in variations %}
                                                             <option value="{{ variation.id }}"
                                                             data-id="{{ variation.id }}"
@@ -107,7 +105,6 @@
                                                             {{ variation.variation_value }} {{ variation.id }}</option>
                                                         {% endfor %}
                                                     </select>
-                                                    </form>
                                                 </p>
                                                                             
                                                 </div>
@@ -115,7 +112,7 @@
 
                                         </div>
                                        <div class="mt-3">
-                                        {% if variation_stock <= 0 %}
+                                        {% if default_variation.stock <= 0 %}
                                             <h4 class="text-danger">Out of Stock</h4>
                                         {% else %}
                                         {% if in_cart %}
@@ -127,8 +124,8 @@
                                         <button type="submit" class="btn border border-secondary rounded-pill px-4 py-2 mb-4 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Add to cart</button>
                                         {% endif %}
                                         {% endif %}
+                                    </form>
                                         </div>
-                            </form>    
                             </div>
 
                                 </div>
@@ -200,12 +197,19 @@
                                                 </div>
                                             </div>
                                             <div class="tab-pane" id="nav-mission" role="tabpanel" aria-labelledby="nav-mission-tab">
+                                                {% for i in review %}
                                                 <div class="d-flex">
                                                     <img src="{% static 'img/avatar.jpg' %}" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
-                                                    <div class="">
-                                                        <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
+                                                    
+                                                    <div class=""> 
+                                                       <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
+
                                                         <div class="d-flex justify-content-between">
-                                                            <h5>Jason Smith</h5>
+                                                            <h5>{{ i.user.first_name}} {{ i.user.last_name }}</h5>
+                                                            <div class="rating-box">
+                                                                {{ i.average_rating }}
+                                                                <i class="fa fa-star selected"></i>
+                                                            </div>
                                                             <div class="d-flex mb-3">
                                                                 <i class="fa fa-star text-secondary"></i>
                                                                 <i class="fa fa-star text-secondary"></i>
@@ -214,28 +218,11 @@
                                                                 <i class="fa fa-star"></i>
                                                             </div>
                                                         </div>
-                                                        <p>The generated Lorem Ipsum is therefore always free from repetition injected humour, or non-characteristic 
-                                                            words etc. Susp endisse ultricies nisi vel quam suscipit </p>
+                                                        <p> {{ i.review }} </p>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex">
-                                                    <img src="{% static 'img/avatar.jpg' %}" class="img-fluid rounded-circle p-3" style="width: 100px; height: 100px;" alt="">
-                                                    <div class="">
-                                                        <p class="mb-2" style="font-size: 14px;">April 12, 2024</p>
-                                                        <div class="d-flex justify-content-between">
-                                                            <h5>Sam Peters</h5>
-                                                            <div class="d-flex mb-3">
-                                                                <i class="fa fa-star text-secondary"></i>
-                                                                <i class="fa fa-star text-secondary"></i>
-                                                                <i class="fa fa-star text-secondary"></i>
-                                                                <i class="fa fa-star"></i>
-                                                                <i class="fa fa-star"></i>
-                                                            </div>
-                                                        </div>
-                                                        <p class="text-dark">The generated Lorem Ipsum is therefore always free from repetition injected humour, or non-characteristic 
-                                                            words etc. Susp endisse ultricies nisi vel quam suscipit </p>
-                                                    </div>
-                                                </div>
+                                                {% endfor %}
+                                                
                                             </div>
                                             <div class="tab-pane" id="nav-vision" role="tabpanel">
                                                 <p class="text-dark">Tempor erat elitr rebum at clita. Diam dolor diam ipsum et tempor sit. Aliqu diam

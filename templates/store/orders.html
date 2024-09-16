@@ -19,8 +19,8 @@
       </div>
         
       {% endfor %}
-<div class="container-fluid py-5">
-    <div class="container py-5">
+<div class="container-fluid py-2">
+    <div class="container py-2">
         <h1 class="mb-4">Order History</h1>
         {% for order in orders %}
         <div class="order-summary mb-5 p-4 border rounded">
@@ -33,7 +33,6 @@
                         <p>Delivery Date: {{ order.delivery_date }}</p>
                         {% endif %}
                         <p>Order Date: {{ order.created_at }}</p>
-                        <p>Subtotal: {{ order.sub_total }}</p>
                         <p>Total: ${{ order.order_total }}</p>
                     </div>
                 </div>

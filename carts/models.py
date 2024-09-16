@@ -57,6 +57,7 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, null=True)
     is_active = models.BooleanField(default=True)
     variation = models.ForeignKey(Variation, on_delete=models.CASCADE ,null=True)
+    sub_total  = models.IntegerField(default=0)
     quantity = models.IntegerField(default=1)
 
     class Meta:

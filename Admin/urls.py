@@ -30,6 +30,8 @@ urlpatterns = [
     path('coupons/<int:pk>/delete/', views.coupon_delete, name='coupon_delete'),
     path('sales_report/', views.sales_report, name='sales_report'),
     path('returns/', views.return_list, name='return_list'),
+    path('top_salling/', views.top_selling_products_and_categories, name='top_selling'),
+    path('ledger_book/', views.ledger_view, name='ledger_book'),
 
 ]
 

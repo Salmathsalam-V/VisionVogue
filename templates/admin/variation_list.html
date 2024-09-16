@@ -11,7 +11,7 @@
 
 <h2>Variation List</h2>
 <a href="{% url 'myadmin:add_variation' %}" class="btn btn-primary mb-3">Add variation</a>
-<table>
+<table class="table table-striped">
     <thead>
         <tr>
             <th>Product</th>
@@ -29,8 +29,8 @@
             <td>{{ variation.variation_value }}</td>
             <td>{{ variation.stock }}</td>
             <td>
-                <a href="{% url 'myadmin:update_variation' variation.pk %}">Edit</a> |
-                <a href="{% url 'myadmin:delete_variation' variation.pk %}">Delete</a>
+                <a href="{% url 'myadmin:update_variation' variation.pk %}" style="color: white; text-decoration: none;"><button class="btn btn-warning">Edit</button> </a>
+                <a href="{% url 'myadmin:delete_variation' variation.pk %}" style="color: white; text-decoration: none;"><button class="btn btn-danger">Delete</button></a>
             </td>
         </tr>
         {% endfor %}

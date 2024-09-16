@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+            color: #555;
+        }
+        .invoice-header {
+            margin-bottom: 20px;
+        }
+        .invoice-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .invoice-details {
+            margin-bottom: 30px;
+        }
+        .invoice-items {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .invoice-items td, .invoice-items th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .total {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+   <center><h1 style="color: blueviolet;">VisionVogue</h1></center> 
+    <div class="invoice-box">
+        <div class="invoice-header">
+
+            <h1>Invoice</h1>
+            <p>Invoice ID: {{ order.order_number }}</p>
+            <p>Date: {{ order.created_at|date:"F j, Y" }}</p>
+        </div>
+
+        <div class="invoice-details">
+            <p><strong>Customer Details:</strong></p>
+            <p>{{ order.address.first_name }} {{ order.address.last_name }}</p>
+            <p>{{ order.user.email }}
+            , {{ order.address.address_line_1 }},, {{ order.address.city }}, {{ order.address.state }}, {{ order.address.country }}</p>
+        </div>
+
+        <table class="invoice-items">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Image</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Shipping </th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order_product in order_products %}
+                <tr>
+                    <td>{{ order_product.product.product_name }}</td>
+                    <!-- <td><img src="{{ order_product.variation.images.url }}" class="img-fluid me-3 rounded" style="width: 100px; height: 100px;" alt=""></td> -->
+                    <td>{{ order_product.variation.variation_value }}</td>
+                    <td>{{ order_product.quantity }}</td>
+                    <td>${{ order_product.product_price }}</td>
+                    <td>100 for a order</td>
+                    <td>${{ total_price }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3" class="total">Total:</td>
+                    <td class="total">${{ total_price }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -21,7 +21,8 @@
         </div>
           
         {% endfor %}
-    <div class="container py-5">
+    <div class="container py-2">
+       <h3>#{{ order.order_number }}</h3> 
         <div class="order-summary mb-5 p-4 border rounded">
             <h4>Order Details</h4>
             <div class="d-flex justify-content-between">
@@ -29,10 +30,11 @@
                     <p><strong>Order ID:</strong> {{ order.order_number }}</p>
                     <p><strong>Status:</strong> <span class="text-success">{{ order.get_status_display }}</span></p>
                     <p><strong>Order Date:</strong> {{ order.created_at }}</p>
+                    <p><strong>Shipping Charge : </strong> 100</p>
                     <p><strong>Total:</strong> ${{ order.order_total }}</p>
                     {% for i in payment%}
                     <p><strong>Payment Method  : </strong> {{ i.payment_method }}</p>
-                    <p><strong>Payment Method  : </strong> {{ i.status }}</p>
+                    <p><strong>Payment Status  : </strong> {{ i.status }}</p>
 
                     {% endfor %}
                                     <p><strong>Name and Phone:</strong> {{ order.address.first_name }} {{ order.address.last_name }}, {{ order.address.phone }}</p>

@@ -36,7 +36,8 @@
                             <th scope="col">Price</th>
                             <th scope="col">Quantity</th>
                             <th scope="col">Offer Price</th>
-                            <th scope="col">Total</th>
+                            <th scope="col">Stock</th>
+                            <th scope="col">Sub-Total</th>
                             <th scope="col">Handle</th>
                           </tr>
                         </thead>
@@ -55,7 +56,7 @@
                                             </p>
                                         </td>
                                         <td>
-                                            <p class="mb-0 mt-4">${{ cart_item.variation.price }}</p>
+                                            <p class="mb-0 mt-4">Rs - {{ cart_item.variation.price }}</p>
                                         </td>
                                         <td>
                                             <div class="input-group quantity mt-4" style="width: 100px;">
@@ -66,17 +67,20 @@
                                                 </div>
                                                 <input type="text" class="form-control form-control-sm text-center border-0" value="{{ cart_item.quantity }}" readonly>
                                                 <div class="input-group-btn">
-                                                    <a href="{% url 'cart:add_cart' cart_item.variation.id %}" class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                                    <a href="{% url 'cart:add_cart' %}?variation_id={{ cart_item.variation.id }}" class="btn btn-sm btn-plus rounded-circle bg-light border">
                                                         <i class="fa fa-plus"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
-                                            <p class="mb-0 mt-4">${{ cart_item.variation.offer_price }}</p>
+                                            <p class="mb-0 mt-4">Rs - {{ cart_item.variation.offer_price }}</p>
                                         </td>
                                         <td>
-                                            <p class="mb-0 mt-4">${{ cart_item.sub_total }}</p>
+                                            <p class="mb-0 mt-4">{{ cart_item.variation.stock }}</p>
+                                        </td>
+                                        <td>
+                                            <p class="mb-0 mt-4">{{ cart_item.sub_total }}</p>
                                         </td>
                                         <td>
                                             <a href="{% url 'cart:remove_cart_item' cart_item.id  %}" class="btn btn-md rounded-circle bg-light border mt-4">
@@ -88,7 +92,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-5">
+<div class="row">
+                <div class="mt-5"></div>
                     <form method="POST" action="{% url 'cart:apply_coupon' %}">
                         {% csrf_token %}
                         <input type="text" name="coupon_code" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
@@ -105,7 +110,7 @@
                         <p>No coupons applied.</p>
                     {% endif %}
                 </div>
-                <div class="row g-4 justify-content-end">
+                <div class="row justify-content-end">
                     <div class="col-8"></div>
                     <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
                         <div class="bg-light rounded">
@@ -113,12 +118,12 @@
                                 <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
                                 <div class="d-flex justify-content-between mb-4">
                                     <h5 class="mb-0 me-4">Subtotal:</h5>
-                                    <p class="mb-0">${{ total|floatformat:2 }}</p>
+                                    <p class="mb-0">Rs {{ total|floatformat:2 }}</p>
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <h5 class="mb-0 me-4">Shipping</h5>
                                     <div>
-                                        <p class="mb-0">Cost: $100.00</p>
+                                        <p class="mb-0">Cost: Rs 100.00</p>
                                     </div>
                                 </div>
                             
@@ -131,7 +136,7 @@
                         </div>
                             <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
                                 <h5 class="mb-0 ps-4 me-4">Total</h5>
-                                <p class="mb-0 pe-4">${{ grand_total|floatformat:2 }}</p>
+                                <p class="mb-0 pe-4">Rs {{ grand_total|floatformat:2 }}</p>
                             </div>
                             <div class="justify-content-center">
                             <a href="{% url 'cart:checkout' %}"> <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed to Checkout</button></a>
@@ -140,6 +145,7 @@
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
         <!-- Cart Page End -->
@@ -199,5 +205,6 @@
             }
         });
         </script>
+        
         
 {% endblock %}

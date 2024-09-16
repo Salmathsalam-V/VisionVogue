@@ -28,7 +28,6 @@ from . models import Referral
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-
 # Account and signup start
 def account_index(request):
     return render(request, "account_index.html")
@@ -133,6 +132,7 @@ def signin(request):
             return redirect("signin")     
     return render(request, "account/login.html")
 # google
+
 @csrf_exempt
 def auth_receiver(request):
     print('Inside')
@@ -163,7 +163,10 @@ def signout(request):
 # Account and signup end
 
 def my_account(request):
-    return render(request,'account/my_account.html')
+    current_user = request.user
+    wallet, created = Wallet.objects.get_or_create(user=current_user)
+    context= {'wallet': wallet }
+    return render(request,'account/my_account.html',context)
 
 def profile(request):
     current_user = request.user  

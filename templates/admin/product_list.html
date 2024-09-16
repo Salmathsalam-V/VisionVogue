@@ -17,10 +17,8 @@
         <tr>
             <th>Name</th>
             <th>Category</th>
-            <th>Image</th>
-            <th>Price</th>
-            <th>Offer Price</th>
-            <th>Stock</th>
+            <th>Frame model</th>
+            <th>Sex</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -29,12 +27,8 @@
         <tr>
             <td>{{ product.product_name }}</td>
             <td>{{ product.category.brand_name }}</td>
-            <td>
-                <img src="{{ product.images.url }}" class="img-fluid w-75 rounded-top" alt="" style="height: 100px;">
-            </td>
-            <td>{{ product.price }}</td>
-            <td>{{ product.offer_price }}</td>
-            <td>{{ product.stock }}</td>
+            <td>{{ product.frame_model }}</td>
+            <td>{{ product.sex }}</td>
             <td>
                 <a href="{% url 'myadmin:product_update' product.pk %}" class="btn btn-sm btn-warning">Edit</a>
                 {% if not product.is_delete %}

@@ -1,0 +1,41 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+
+<h2>Ledger Book</h2>
+
+<table  class="table">
+    <thead>
+        <tr>
+            <th>Transaction ID</th>
+            <th>User</th>
+            <th>Order ID</th>
+            <th>Payment Method</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Date/Time</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in ledger_data %}
+        <tr>
+            <td>{{ transaction.payment_id }}</td>
+            <td>{{ transaction.user__username }}</td>
+            <td>{{ transaction.order__order_number }}</td>
+            <td>{{ transaction.payment_method }}</td>
+            <td>{{ transaction.amount_paid }}</td>
+            <td>{{ transaction.status }}</td>
+            <td>{{ transaction.created_at }}</td>
+            {% if transaction.order in return_ %}
+            <td> Product returned </td>
+            {% else %}
+            <td> Order status '{{ transaction.order__status }} ' </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<b><h3>Total Amount: {{ total_amount }}</h3></b>
+
+
+{% endblock %}

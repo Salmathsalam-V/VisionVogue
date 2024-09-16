@@ -80,7 +80,7 @@ variation_category_choice = (
 )
 
 class Variation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product            = models.ForeignKey(Product, on_delete=models.CASCADE)
     variation_category = models.CharField(max_length=100, choices=variation_category_choice)
     variation_value    = models.CharField(max_length=100)
     images             = ProcessedImageField(
@@ -115,6 +115,12 @@ class Review(models.Model):
     review = models.TextField()
     rating = models.IntegerField()
 
+    def update_rating(self):
+        reviews = self.reviews.all()
+        self.review_count = reviews.count()
+        self.average_rating = reviews.aggregate(models.Avg('rating'))['rating__avg'] or 0.00
+        self.save()
+        
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.product.update_rating()
@@ -142,4 +148,4 @@ class Review(models.Model):
 
 class Wishlist(models.Model):
     user        = models.ForeignKey(Account, on_delete=models.CASCADE)
-    products    = models.ManyToManyField(Product)
+    variation    = models.ManyToManyField(Variation)

@@ -6,8 +6,9 @@
 {% block content %}
 
 <body>
+    <br><br><br><br><br><br><br><br>
     <h1>Return Order</h1>
-    <p>Are you sure you want to Return the order #{{ order.id }}?</p>
+    <p>Are you sure you want to Return the order #{{ order.order_number }}?</p>
     <form method="post">
         {% csrf_token %}
         <label>Reason : </label><input type="text" name="reason" id="reason">

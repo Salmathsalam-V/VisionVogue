@@ -1,0 +1,44 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h2>Top 10 Best-Selling Products</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th>Total Quantity Sold</th>
+            <th>Total Sales</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in top_products %}
+        <tr>
+            <td>{{ product.variation__product__product_name }}</td>
+            <td>{{ product.variation__product__category__brand_name }}</td>
+            <td>{{ product.total_quantity_sold }}</td>
+            <td>{{ product.total_sales }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Top 10 Best-Selling Categories</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category Name</th>
+            <th>Total Quantity Sold</th>
+            <th>Total Sales</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in top_categories %}
+        <tr>
+            <td>{{ category.product__category__brand_name }}</td>
+            <td>{{ category.total_quantity_sold }}</td>
+            <td>{{ category.total_sales }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
