@@ -57,23 +57,22 @@
                           </div>
                           <div class="col-6"></div>
                           <div class="col-xl-3">
-                              <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
-                                <form id="fruitform" method="get" action="{% url 'store:store' %}">
-                                    <input type="hidden" name="sex" value="{{ sex_filter }}">
-                                    <label for="fruits">Sorting:</label>
-                                    <select id="fruits" name="fruitlist" class="border-0 form-select-sm bg-light me-3" onchange="this.form.submit()">
-                                        <option value="nothing" {% if request.GET.fruitlist == 'nothing' %}selected{% endif %}>Nothing</option>
-                                        <option value="new_arrivals" {% if request.GET.fruitlist == 'new_arrivals' %}selected{% endif %}>New arrivals</option>
-                                        <option value="popularity" {% if request.GET.fruitlist == 'popularity' %}selected{% endif %}>Popularity</option>
-                                        <option value="Low" {% if request.GET.fruitlist == 'Low' %}selected{% endif %}>Price low-high</option>
-                                        <option value="high" {% if request.GET.fruitlist == 'high' %}selected{% endif %}>Price high-low</option>
-                                        <option value="AaZz" {% if request.GET.fruitlist == 'AaZz' %}selected{% endif %}>Aa-Zz</option>
-                                        <option value="ZzAa" {% if request.GET.fruitlist == 'ZzAa' %}selected{% endif %}>Zz-Aa</option>
-                                    </select>
-                                </form>
-                                
-                              </div>
-                          </div>
+                            <div class="bg-light ps-3 py-3 rounded d-flex justify-content-between mb-4">
+                              <form id="fruitform" method="get" action="{% url 'store:store' %}">
+                                  <label for="fruits">Default Sorting:</label>
+                                  <select id="fruits" name="fruitlist" class="border-0 form-select-sm bg-light me-3" onchange="this.form.submit()">
+                                      <option value="nothing" {% if request.GET.fruitlist == 'nothing' %}selected{% endif %}>Nothing</option>
+                                      <option value="new_arrivals" {% if request.GET.fruitlist == 'new_arrivals' %}selected{% endif %}>New arrivals</option>
+                                      <option value="popularity" {% if request.GET.fruitlist == 'popularity' %}selected{% endif %}>Popularity</option>
+                                      <option value="Low" {% if request.GET.fruitlist == 'Low' %}selected{% endif %}>Price low-high</option>
+                                      <option value="high" {% if request.GET.fruitlist == 'high' %}selected{% endif %}>Price high-low</option>
+                                      <option value="AaZz" {% if request.GET.fruitlist == 'AaZz' %}selected{% endif %}>Aa-Zz</option>
+                                      <option value="ZzAa" {% if request.GET.fruitlist == 'ZzAa' %}selected{% endif %}>Zz-Aa</option>
+                                  </select>
+                              </form>
+                              
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row col-12 g-4">
@@ -85,9 +84,10 @@
                                     <a href="{% url 'store:store' %}" class="btn btn-secondary">Clear All Filters</a>
                                 </div>
 
-                                <div class="mb-3">
-                                    <h4>Brands</h4>
-                                    <form method="GET" action="{% url 'store:store' %}" id="brand-filter-form">
+                                <form method="GET" action="{% url 'store:store' %}" id="combined-filter-form">
+                                    <!-- Brands Filtering -->
+                                    <div class="mb-3">
+                                        <h4>Brands</h4>
                                         <ul class="list-unstyled fruite-categorie">
                                             <li>
                                                 <div class="d-flex justify-content-between fruite-name">
@@ -98,124 +98,95 @@
                                                     </label>
                                                 </div>
                                             </li>
-                                            {% for category in links %}  
-                                                {% if not category.is_delete %}                        
-                                                    <li>
-                                                        <div class="d-flex justify-content-between fruite-name">
-                                                            <label>
-                                                                <input type="checkbox" name="brands" value="{{ category.brand_name }}" 
-                                                                    {% if category.brand_name in selected_brands %} checked {% endif %}> 
-                                                                <i class="bi bi-sunglasses text-dark"></i> - {{ category.brand_name }}
-                                                            </label>
-                                                        </div>
-                                                    </li>
-                                                {% endif %}
+                                            {% for category in links %}
+                                            {% if not category.is_delete %}
+                                            <li>
+                                                <div class="d-flex justify-content-between fruite-name">
+                                                    <label>
+                                                        <input type="checkbox" name="brands" value="{{ category.brand_name }}" 
+                                                            {% if category.brand_name in selected_brands %} checked {% endif %}>
+                                                        <i class="bi bi-sunglasses text-dark"></i> - {{ category.brand_name }}
+                                                    </label>
+                                                </div>
+                                            </li>
+                                            {% endif %}
                                             {% endfor %}
                                         </ul>
-                                    </form>
-                                </div>
-                            </div>
-
-<!-- Frame Model Multiple Selection -->
+                                    </div>
+                                
+                                    <!-- Frame Model Filtering -->
+                                    <div class="mb-3">
+                                        <h4 class="mb-2">Frame Model</h4>
+                                        <ul class="list-unstyled">
+                                            {% for model, label in frame_model_choices %}
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" name="frame_model" value="{{ model }}" 
+                                                        {% if model in selected_frame_models %}checked{% endif %}>
+                                                    {{ label }}
+                                                </label>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                
+                                    <!-- Sex Filtering -->
+                                    <div class="mb-3">
+                                        <h4 class="mb-2">Sex</h4>
+                                        <ul class="list-unstyled fruite-categorie">
+                                            {% for value, label in sex_choices %}
+                                            <li>
+                                                <label>
+                                                    <input type="checkbox" name="sex" value="{{ value }}" 
+                                                        {% if value in selected_sexes %}checked{% endif %}>
+                                                    {{ label }}
+                                                </label>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
 <div class="mb-3">
-    <h4 class="mb-2">Frame Model</h4>
-    <form method="GET" action="{% url 'store:store' %}" id="frame-model-form">
-        <ul class="list-unstyled">
-            {% for model, label in frame_model_choices %}
-            <li>
-                <label>
-                    <input type="checkbox" name="frame_model" value="{{ model }}" 
-                        {% if model in selected_frame_models %}checked{% endif %}>
-                    {{ label }}
-                </label>
-            </li>
-            {% endfor %}
-        </ul>
-    </form>
+    <button type="submit" class="btn btn-primary">Apply Filters</button>
 </div>
+</form>
 
-<!-- Sex Multiple Selection -->
-<div class="mb-3">
-    <h4 class="mb-2">Sex</h4>
-    <form method="GET" action="{% url 'store:store' %}" id="sex-form">
-        <ul class="list-unstyled">
-            {% for value, label in sex_choices %}
-            <li>
-                <label>
-                    <input type="checkbox" name="sex" value="{{ value }}" 
-                        {% if value in selected_sexes %}checked{% endif %}>
-                    {{ label }}
-                </label>
-            </li>
-            {% endfor %}
-        </ul>
-    </form>
-</div>
+<!-- <div class="col-lg-12">
+    <div class="mb-3">
+        <h4>Additional</h4>
+        <form method="get" id="sortForm">
+            <input type="hidden" name="sex" value="{{ sex_filter }}">
+            <div class="mb-2">
+                <input type="radio" class="me-2" id="Categories-5" name="additional_sort" value="none" {% if additional_sort == 'none' %}checked{% endif %} onchange="this.form.submit()">
+                <label for="Categories-5">None</label>
+            </div>
+            <div class="mb-2">
+                <input type="radio" class="me-2" id="Categories-1" name="additional_sort" value="polarized" {% if additional_sort == 'polarized' %}checked{% endif %} onchange="this.form.submit()">
+                <label for="Categories-1">Polarized</label>
+            </div>
+            <div class="mb-2">
+                <input type="radio" class="me-2" id="Categories-2" name="additional_sort" value="gradient" {% if additional_sort == 'gradient' %}checked{% endif %} onchange="this.form.submit()">
+                <label for="Categories-2">Gradient</label>
+            </div>
+            <div class="mb-2">
+                <input type="radio" class="me-2" id="Categories-3" name="additional_sort" value="uv protection" {% if additional_sort == 'uv protection' %}checked{% endif %} onchange="this.form.submit()">
+                <label for="Categories-3">UV Protection</label>
+            </div>
+            <div class="mb-2">
+                <input type="radio" class="me-2" id="Categories-4" name="additional_sort" value="color changing" {% if additional_sort == 'color changing' %}checked{% endif %} onchange="this.form.submit()">
+                <label for="Categories-4">Color Changing</label>
+            </div>
+        </form>
+    </div>
+</div> -->
 
-
-                        <div class="col-lg-12">
-                            <div class="mb-3">
-                                <h4>Additional</h4>
-                                <form method="get" id="sortForm">
-                                    <input type="hidden" name="sex" value="{{ sex_filter }}">
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-5" name="additional_sort" value="none" {% if additional_sort == 'none' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-5">None</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-1" name="additional_sort" value="polarized" {% if additional_sort == 'polarized' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-1">Polarized</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-2" name="additional_sort" value="gradient" {% if additional_sort == 'gradient' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-2">Gradient</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-3" name="additional_sort" value="uv protection" {% if additional_sort == 'uv protection' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-3">UV Protection</label>
-                                    </div>
-                                    <div class="mb-2">
-                                        <input type="radio" class="me-2" id="Categories-4" name="additional_sort" value="color changing" {% if additional_sort == 'color changing' %}checked{% endif %} onchange="this.form.submit()">
-                                        <label for="Categories-4">Color Changing</label>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+                        
                         <div class="col-lg-12">
                             <div class="d-flex justify-content-center my-4">
                                 <a href="{% url 'store:store' %}" class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">View More</a>
                             </div>
-                            <!-- <h4 class="mb-3">Featured Products</h4> -->
-                            <!-- {% for i in featured %}
-                            <div class="d-flex align-items-center justify-content-start mb-3">
-                                <div class="rounded me-4" style="width: 100px; height: 100px;">
-                                    <a href="{{ i.get_url }}">
-                                        <img src="{{ i.images.url }}" class="img-fluid rounded" alt="{{ i.product_name }}">
-                                    </a>
-                                </div>
-                                <div>
-                                    <h6 class="mb-2">{{ i.product_name }}</h6>
-                                    <div class="rating-box">
-                                        {{ product.average_rating }}
-                                            <i class="fa fa-star selected"></i>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <h5 class="fw-bold me-2">${{ i.get_discounted_price }}</h5>
-                                        {% if i.get_discounted_price < i.price %}
-                                        <h5 class="text-danger text-decoration-line-through">${{ i.price }}</h5>
-                                        {% else %}
-                                        <h5 class="fw-bold me-2">${{ i.price }}</h5>
-                                        {% endif %}
-
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %} -->
-                            <!-- <div class="d-flex justify-content-center my-4">
-                                <a href="{% url 'store:store' %}" class="btn border border-secondary px-4 py-3 rounded-pill text-primary w-100">View More</a>
-                            </div> -->
                         </div>
                         
+                        </div>
                         </div>
                         <div class="col-lg-9">
                             <div class="row g-4 justify-content-center">
@@ -357,6 +328,13 @@
     </script>  
     
     <script>
+
+
+        const sexForm = document.getElementById('sex-form');
+        const checkboxes = sexForm.querySelectorAll('input[type="checkbox"]');
+
+        const allProductsCheckbox = document.getElementById('all-products-checkbox');
+        const brandCheckboxes = document.querySelectorAll('input[name="brands"]:not(#all-products-checkbox)');
         // Auto-submit brand form
         document.querySelectorAll('#brand-filter-form input[type="checkbox"]').forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
@@ -372,11 +350,28 @@
         });
     
         // Auto-submit sex form
-        document.querySelectorAll('#sex-filter-form input[type="checkbox"]').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                document.getElementById('sex-filter-form').submit();
-            });
+        checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            sexForm.submit();
         });
+    });
+    allProductsCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            // Uncheck all other brand checkboxes
+            brandCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+        }
+        brandForm.submit();  // Automatically submit the form when All is selected
+    });
+    brandCheckboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                allProductsCheckbox.checked = false;
+            }
+            brandForm.submit();  // Automatically submit the form when a brand is selected
+        });
+    });
     </script>    
  
  

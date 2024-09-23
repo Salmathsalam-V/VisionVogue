@@ -69,7 +69,7 @@
         <div class="border border-primary rounded position-relative vesitable-item">
             <div class="vesitable-img">
                 <a href="{{ i.get_url }}">
-                <img src="{{ i.first_variation_image.url  }}" class="img-fluid w-100 rounded-top" style="height: 200px; width: 300px;" alt="{{ product.product_name }}">
+                    <img src="{{ i.first_variation_image }}" class="img-fluid w-100 rounded-top" style="height: 200px; width: 300px;" alt="{{ i.product_name }}">
                 </a>
             </div>
             <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">{{i.category.brand_name}}</div>

@@ -31,20 +31,31 @@ def store(request, category_slug=None):
     # Apply brand filtering before converting to a list
     selected_brands = request.GET.getlist('brands')
     if selected_brands:
-        products = products.filter(category__brand_name__in=selected_brands)  # Apply filter on queryset
-
+        if 'all' in selected_brands:
+            products = products.filter(is_available=True)
+        else:
+            products = products.filter(category__brand_name__in=selected_brands, is_available=True)
+            
     # Apply other filters, e.g., frame model, sex, and additional sorting features
-    frame_model_filter = request.GET.get('frame_model', '')
-    if frame_model_filter:
-        products = products.filter(frame_model__icontains=frame_model_filter)  # Assuming frame_model is a field
+    selected_frame_models = request.GET.getlist('frame_model')
+    if selected_frame_models:
+        products = products.filter(frame_model__in=selected_frame_models)  # Adjusted for multiple selections
+    
+    sex_filter = request.GET.getlist('sex')
+    if sex_filter:
+        products = products.filter(sex__in=sex_filter)  # Adjusted for multiple selections
 
-    additional_sort = request.GET.get('additional_sort', '')
-    if additional_sort:
-        products = products.filter(features__icontains=additional_sort)  # Assuming features is a field or use OR condition
+    # additional_sort = request.GET.get('additional_sort', 'none')
+    # # Filtering by additional feature
+    # if additional_sort == 'polarized':
+    #     products = products.filter(Q(features='polarized'))
+    # elif additional_sort == 'gradient':
+    #     products = products.filter(Q(features='gradient'))
+    # elif additional_sort == 'uv protection':
+    #     products = products.filter(Q(features='uv protection'))
+    # elif additional_sort == 'color changing':
+    #     products = products.filter(Q(features='color changing'))
 
-    sex_filter = request.GET.get('sex', '')
-    if sex_filter and sex_filter != 'none':
-        products = products.filter(sex=sex_filter)
 
     # Sorting logic
     sort_option = request.GET.get('fruitlist', 'nothing')
@@ -65,7 +76,7 @@ def store(request, category_slug=None):
 
     # Convert products to list only after applying all filters
     products = [product for product in products if product.filtered_variation]
-
+    first_variation=None
     # Handle first variation image
     for product in products:
         if product.active_variations:
@@ -100,6 +111,7 @@ def store(request, category_slug=None):
         ('female', 'Women'),
         ('unisex', 'Unisex'),
     ]
+    
     # Pagination
     paginator = Paginator(products, 9 if category_slug is None else 3)
     page = request.GET.get('page')
@@ -117,9 +129,9 @@ def store(request, category_slug=None):
         'featured': featured,
         'wishlist': wishlist_variation_ids,
         'selected_brands': selected_brands,
-        'selected_frame_models': frame_model_filter,
+        'selected_frame_models': selected_frame_models,
         'selected_sexes': sex_filter,
-        'selected_features': additional_sort,
+        # 'additional_sort': additional_sort,
         'frame_model_choices': FRAME_MODEL_CHOICES,
         'sex_choices': SEX_CHOICES, 
     }
@@ -178,8 +190,10 @@ def load_variant(request, variation_id):
         return JsonResponse({'error': 'Variation not found'}, status=404)
  
  
-@login_required
+
 def post_review(request, product_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     product = get_object_or_404(Product, id=product_id)
     
     if request.method == 'POST':
@@ -215,15 +229,18 @@ def search(request):
 
 
 
-@login_required
 def add_to_wishlist(request, variation_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     variation = get_object_or_404(Variation, id=variation_id)
     wishlist, created = Wishlist.objects.get_or_create(user=request.user)
     wishlist.variation.add(variation)
     return JsonResponse({'status': 'success', 'message': 'Product added to your wishlist!'})
 
-@login_required
+
 def remove_from_wishlist(request, variation_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     variation = get_object_or_404(Variation, id=variation_id)
     wishlist = get_object_or_404(Wishlist, user=request.user)
 
@@ -249,15 +266,16 @@ def wishlist(request):
 
     # Filter recommended products and annotate with first variation details
     recommend = Product.objects.filter(
-        variation__stock__gt=0,  # Use variation stock for recommendation
+        variation__stock__gt=0,  
         is_available=True
     ).annotate(
         first_variation_id=Subquery(first_variation_id_subquery),
         first_variation_price=Subquery(first_variation_price_subquery),
         first_variation_offer_price=Subquery(first_variation_offer_price_subquery),
-        first_variation_image=Subquery(first_variation_image_subquery)
     ).distinct()[:6]
-
+    first_variation_image_subquery = Variation.objects.filter(
+    product=OuterRef('pk'), is_active=True
+    ).order_by('id').values('gallery_images__images')[:1]
     wishlist_items = []
     try:
         wishlist = Wishlist.objects.get(user=request.user)

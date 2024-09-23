@@ -66,6 +66,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google', 
+    'mathfilters',
+
 ]
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -212,7 +214,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Automatically skip the extra confirmation screen
 SOCIALACCOUNT_AUTO_SIGNUP = True
-
+SOCIALACCOUNT_LOGIN_ON_GET = True
 # Skip email verification step if you trust the provider (e.g., Google)
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 

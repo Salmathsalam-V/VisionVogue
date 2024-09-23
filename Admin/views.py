@@ -30,33 +30,84 @@ from django.utils import timezone
 from datetime import datetime
 from django.views.generic import ListView, UpdateView, DeleteView
 import json
+import calendar
+
 
 def admin_dashboard(request):
-    # Get date filter (yearly, monthly, etc.)
+    # if request.user not in Account.objects.filter(is_admin=True):
+    #     return redirect('login')
+
     period = request.GET.get('period', 'yearly')
 
-    # Filter data by period
+    # Initialize sales data and labels
+    sales_data = []
+    labels = []
+
+    # Get current date
     today = datetime.today()
+
     if period == 'yearly':
-        start_date = today.replace(month=1, day=1)  # Start of the year
+        # Group sales by year
+        sales = OrderProduct.objects.annotate(year=F('order__created_at__year')).values('year').annotate(
+            total_sales=Sum(F('quantity') * F('product_price'))
+        ).order_by('year')
+
+        labels = [sale['year'] for sale in sales]
+        sales_data = [sale['total_sales'] for sale in sales]
+
+        # Ensure at least 4 years are shown, pad with zero if necessary
+        if len(labels) < 4:
+            current_year = today.year
+            for i in range(4 - len(labels)):
+                labels.insert(0, current_year - len(labels))  # Add previous years
+                sales_data.insert(0, 0)  # Add zero sales for missing years
+
     elif period == 'monthly':
-        start_date = today.replace(day=1)  # Start of the month
+        # Get the latest 4 months
+        current_year = today.year
+        current_month = today.month
+
+        # Prepare list for the latest 4 months (e.g., ['August', 'July', 'June', 'May'])
+        labels = []
+        sales_data = []
+
+        for i in range(4):
+            month = current_month - i
+            year = current_year
+            if month <= 0:  # Adjust for previous years
+                month += 12
+                year -= 1
+            
+            # Get the month name (e.g., "August")
+            month_name = calendar.month_name[month]
+            labels.insert(0, f"{month_name} {year}")  # Add to labels
+
+            # Calculate the sales for this month
+            month_sales = OrderProduct.objects.filter(
+                order__created_at__year=year,
+                order__created_at__month=month
+            ).aggregate(total_sales=Sum(F('quantity') * F('product_price')))['total_sales'] or 0
+            sales_data.insert(0, month_sales)
+
     elif period == 'weekly':
-        start_date = today - timedelta(days=today.weekday())  # Start of the week
-    else:
-        start_date = None
+        # Get the latest 6 weeks
+        labels = []
+        sales_data = []
 
-    # Get sales data by category
-    category_sales = OrderProduct.objects.filter(order__created_at__gte=start_date).values(
-        'product__category__brand_name'
-    ).annotate(
-        total_sales=Sum(F('quantity') * F('product_price'))
-    ).order_by('-total_sales')
+        for i in range(6):
+            week_start = today - timedelta(days=today.weekday(), weeks=i)  # Start of the current week
+            week_end = week_start + timedelta(days=6)  # End of the week
+            week_label = f"Week {week_start.strftime('%U')} ({week_start.strftime('%b %d')} - {week_end.strftime('%b %d')})"
+            labels.insert(0, week_label)
 
-    # For Chart.js, we need the data in JSON format
-    category_labels = [sale['product__category__brand_name'] for sale in category_sales]
-    category_data = [sale['total_sales'] for sale in category_sales]
+            # Calculate the sales for this week
+            week_sales = OrderProduct.objects.filter(
+                order__created_at__gte=week_start,
+                order__created_at__lte=week_end
+            ).aggregate(total_sales=Sum(F('quantity') * F('product_price')))['total_sales'] or 0
+            sales_data.insert(0, week_sales)
 
+    # Other summary data for the dashboard
     category_count = Category.objects.count()
     product_count = Product.objects.count()
     recent_products = Variation.objects.order_by('-id')[:5]
@@ -65,12 +116,13 @@ def admin_dashboard(request):
         'category_count': category_count,
         'product_count': product_count,
         'recent_products': recent_products,
-        'category_labels': json.dumps(category_labels), 
-        'category_data': json.dumps(category_data),
+        'category_labels': json.dumps(labels), 
+        'category_data': json.dumps(sales_data),
         'period': period,
     }
-    return render(request, 'admin/dashboard.html', context)
 
+    return render(request, 'admin/dashboard.html', context)
+    
 def category_list(request):
     categories = Category.objects.all()
     return render(request, 'admin/category_list.html', {'categories': categories})
@@ -220,7 +272,7 @@ def variation_list(request):
 
 def add_variation(request):
     if request.method == 'POST':
-        variation_form = VariationForm(request.POST)
+        variation_form = VariationForm(request.POST, request.FILES)
         formset = ImageGalleryFormSet(request.POST, request.FILES)
         
         if variation_form.is_valid() and formset.is_valid():
@@ -240,6 +292,7 @@ def add_variation(request):
         'variation_form': variation_form,
         'formset': formset,
     })
+
 # List View
 def variation_list(request):
     variations = Variation.objects.all()
@@ -248,23 +301,25 @@ def variation_list(request):
     }
     return render(request, 'admin/variation_list.html', context)
 
-# Update Variation
+
 def update_variation(request, pk):
     variation = get_object_or_404(Variation, pk=pk)
+    
     if request.method == 'POST':
+        # Initialize form and formset with POST data and files
         form = VariationForm(request.POST, request.FILES, instance=variation)
-        formset = ImageGalleryFormSet(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            for form in formset:
-                image = form.save(commit=False)
-                image.variation = variation
-                image.save()
+        formset = ImageGalleryFormSet(request.POST, request.FILES, instance=variation)
+        form.save()
+        if form.is_valid() and formset.is_valid():
+            form.save()  # Save the variation details
+            formset.save()  # Save the formset images
+
             messages.success(request, 'Variation updated successfully.')
             return redirect('myadmin:variation_list')
     else:
+        # Initialize the form and formset with the existing variation and related images
         form = VariationForm(instance=variation)
-        formset = ImageGalleryFormSet()
+        formset = ImageGalleryFormSet(instance=variation)
 
     context = {
         'form': form,
@@ -302,13 +357,28 @@ def update_order_status(request, order_id):
         form = OrderStatusForm(request.POST, instance=order)
         if form.is_valid():
             previous_status = order.status
-            updated_order = form.save(commit=False)
+            form.save(commit=False)
+            updated_order = Order.objects.get(id=order.id)
+            print(updated_order)
+            payment=Payment.objects.filter(order=order.id).first()
             print("%%%%%%%%%%%%%%%%%%")
-            print("this ",updated_order)
+            print("this ",updated_order.status)
             # If the status is changed to 'Accepted'
+
             if updated_order.status == 'Accepted' and previous_status != 'Accepted':
                 updated_order.delivery_date = timezone.now() + timedelta(days=10)
-            payment=Payment.objects.get(order=order.id)
+            print(updated_order.delivery_date)
+            if updated_order.status == 'Completed' and payment.payment_method == 'COD':
+                payment.status='Completed'
+                payment.save()
+            if payment.status == 'Completed':
+                wallet=Wallet.objects.get(user=order.user)
+                print(wallet.balance)
+                wallet.balance += Decimal(order.order_total)
+                print(wallet.balance)
+                wallet.save()
+                messages.success(request, 'The amount transfered into users wallet!')
+
             print(payment)
             if updated_order.status == 'Cancelled':
                 # Loop through each product in the order and restore stock
@@ -317,6 +387,7 @@ def update_order_status(request, order_id):
                     print("order product",i.variation.id) 
                     print(i.variation.stock)               
                     i.variation.stock += i.quantity
+                    
                     i.save()
                     print(i.variation.stock)
                 print("payment",payment)
@@ -349,15 +420,20 @@ def update_order_status(request, order_id):
     return render(request, 'admin/update_order_status.html', {'form': form, 'order': order})
 
 def order_product_details(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    payment = Payment.objects.filter(payment_id=order.order_number)[:1]
+    print(payment)
     if request.user in Account.objects.filter(is_admin=True):
-        payment = Payment.objects.filter(payment_id = order_id.order_number)
         messages.error(request, "You do not have permission to view this page.")
         return redirect('home', payment)
 
-    order = get_object_or_404(Order, id=order_id)
     order_products = OrderProduct.objects.filter(order=order)
-
-    return render(request, 'admin/order_product_details.html', {'order': order, 'order_products': order_products})
+    context = {
+        'order': order, 
+        'order_products': order_products, 
+        'payment': payment 
+        }
+    return render(request, 'admin/order_product_details.html',context)
 
 
 def coupon_list(request):
@@ -478,7 +554,7 @@ def generate_excel(data):
     font_style = xlwt.XFStyle()
     font_style.font.bold = True
 
-    # Define the columns for the Excel sheet, ensuring they match your sales report data
+    # Define the columns for the Excel sheet
     columns = ['Product Name', 'Variation', 'Quantity Sold', 'Price', 'Offer Price', 'Discount', 'Total Sales', 'Sub Total']
 
     for col_num in range(len(columns)):
@@ -490,7 +566,6 @@ def generate_excel(data):
     # Writing data from the sales report view to the Excel file
     for item in data:
         row_num += 1
-        # Writing each column based on your aggregated data fields
         ws.write(row_num, 0, item['orderproduct__variation__product__product_name'], font_style)  # Product name
         ws.write(row_num, 1, item['orderproduct__variation__variation_value'], font_style)  # Variation (e.g., color/size)
         ws.write(row_num, 2, item['total_quantity'], font_style)  # Quantity sold
@@ -512,22 +587,21 @@ def return_list(request):
     return render(request, 'admin/return_list.html', {'returns': returns})
 
 def top_selling_products_and_categories(request):
-    # Top 10 best-selling products based on the total quantity sold
     top_products = OrderProduct.objects.values(
-        'variation__product__product_name',  # Get the product name
-        'variation__product__category__brand_name',  # Get the product's category name
+        'variation__product__product_name',  
+        'variation__product__category__brand_name', 
     ).annotate(
         total_quantity_sold=Sum('quantity'),
         total_sales=Sum(F('quantity') * F('product_price')),
-    ).order_by('-total_quantity_sold')[:10]  # Limit to the top 10
+    ).order_by('-total_quantity_sold')[:10] 
 
     # Top 10 best-selling categories based on the total quantity of all products in the category sold
     top_categories = OrderProduct.objects.values(
-        'product__category__brand_name',  # Get the category name
+        'product__category__brand_name',  
     ).annotate(
         total_quantity_sold=Sum('quantity'),
         total_sales=Sum(F('quantity') * F('product_price')),
-    ).order_by('-total_quantity_sold')[:10]  # Limit to the top 10
+    ).order_by('-total_quantity_sold')[:10] 
 
     context = {
         'top_products': top_products,

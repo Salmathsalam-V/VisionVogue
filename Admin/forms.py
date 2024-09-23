@@ -27,7 +27,10 @@ ImageGalleryFormSet = inlineformset_factory(
     ImageGallery,  # Related model
     fields=('images',),  # Only include the image field
     extra=3,  # Number of empty image fields to display
-    can_delete=True  # Allow deletion of images
+    can_delete=True,  # Allow deletion of images
+    widgets={
+        'images': forms.FileInput(attrs={'class': 'form-control'}),
+    }
 )
 
 class CategoryForm(forms.ModelForm):

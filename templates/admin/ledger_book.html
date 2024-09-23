@@ -2,7 +2,8 @@
 {% block content %}
 
 <h2>Ledger Book</h2>
-
+<br>
+<b><h3>Total Amount: {{ total_amount }}</h3></b>
 <table  class="table">
     <thead>
         <tr>
@@ -35,7 +36,6 @@
         {% endfor %}
     </tbody>
 </table>
-<b><h3>Total Amount: {{ total_amount }}</h3></b>
 
 
 {% endblock %}

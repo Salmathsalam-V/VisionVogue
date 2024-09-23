@@ -13,10 +13,12 @@
             <p><strong>Is_ordered     : </strong> {{ order.is_ordered }}</p>
             <p><strong>Total           : </strong> ${{ order.order_total }}</p>
             <!-- <p><strong>Payment Method  : </strong> {{ payment.payment_method }}</p> -->
-
+            {% for i in payment %}
+            <p><strong>Payment Method  : </strong> {{ i.payment_method }}</p>
+            <p><strong>Payment Status  : </strong> {{ i.status }}</p>
             <p><strong>Name and Phone  : </strong> {{ order.address.first_name }} {{ order.address.last_name }}, {{ order.address.phone }}</p>
             <p><strong>Delivery Address: </strong> {{ order.address.address_line_1 }}, {{ order.address.city }}, {{ order.address.state }}, {{ order.address.country }}</p>
-
+            {% endfor %}
         </div>
         <div class="order-products mt-4 col-5">
             <h5>Products in this order</h5>
@@ -33,9 +35,12 @@
             {% endfor %}
         </div>
         <div class="col-3">
+            {% if order.get_status_display == 'Completed' or  order.get_status_display == 'Cancelled' or  order.get_status_display == 'Return' %}
+            {% else %}
             <a href="{% url 'myadmin:update_order_status' order.id %}" class="btn btn-primary mt-3">Update Status</a>
-
+            {% endif %}
             <a href="{% url 'myadmin:view_orders' %}" class="btn btn-primary mt-3">Back to Orders</a>
+
         </div>
     </div>
 </div>

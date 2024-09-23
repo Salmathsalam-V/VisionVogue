@@ -1,30 +1,62 @@
 {% extends 'admin/base.html' %}
 {% block content %}
+{% load static %}
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropper/4.1.0/cropper.min.css">
+</head>
+
 <h2>{{ variation.product }} - Edit Variation</h2>
-<h2>Variation</h2>
+
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
 
     <h3>Upload Images</h3>
-    <div class="col-md-4">
-        <label for="{{ form.images.id_for_label }}">Variation Image</label>
-        <input type="file" id="{{ form.images.id_for_label }}" name="{{ form.images.name }}" style="display: none;">
-        <button type="button" onclick="document.getElementById('{{ form.images.id_for_label }}').click();" class="btn btn-primary">Select Image</button>
+    <div class="row">
+        <div class="col-md-4">
+            <label for="{{ form.images.id_for_label }}">Variation Image</label>
+            <input type="file" id="{{ form.images.id_for_label }}" name="{{ form.images.name }}" style="display: none;">
+            <!-- Cropping area for the variation image -->
+            <div id="image-box-variation_images" class="image-crop-area">
+                <img id="croppable-image" src="{{ form.images.value.url }}" alt="Image Preview" style="{% if form.images.value %}display:block{% else %}display:none{% endif %};">
+            </div>
+            <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-variation_images">Crop & Upload</button>
+        </div>
     </div>
 
-    <!-- Cropping Area for Variation Images -->
-    <div id="image-box-variation_images" class="image-crop-area"></div>
-    <img id="preview-variation-images" src="{{ form.images.value.url }}" alt="Image Preview" style="{% if form.images.value %}display:block{% else %}display:none{% endif %};">
-    <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-variation_images">Crop & Upload</button>
-
+    <h3>Gallery Images</h3>
+    <div class="row g-3">
+        {% for form in formset %}
+        <div class="col-md-4">
+            {{ form.as_p }}
+            {% if form.instance.images %}
+                <!-- Cropping area with the image preview -->
+                <div id="image-box-variation_images_{{ forloop.counter0 }}" class="image-crop-area">
+                    <img id="croppable-image-{{ forloop.counter0 }}" 
+                        src="{{ form.instance.images.url }}" 
+                        alt="Image Preview" 
+                        style="display: block; width: 100%; height: auto;">
+                </div>
+                <button type="button" class="btn btn-primary mt-3 not-visible" id="confirm-btn-variation_images_{{ forloop.counter0 }}">Crop & Upload</button>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
     <button type="submit">Save</button>
     <a href="{% url 'myadmin:variation_list' %}">Cancel</a>
 </form>
 
 <style>
     .image-crop-area {
-        width: 300px; /* Adjust the display size */
+        width: 300px;
         height: 200px;
         margin-top: 10px;
         border: 2px dashed #ccc;
@@ -37,59 +69,76 @@
     }
 </style>
 
-
-<!-- JavaScript for image cropping -->
 <script>
-    function setupCropper(inputId, imageBoxId, confirmBtnId) {
-        const input = document.getElementById(inputId);
-        const imageBox = document.getElementById(imageBoxId);
-        const confirmBtn = document.getElementById(confirmBtnId);
-        const csrf = document.getElementsByName('csrfmiddlewaretoken');
+    // Function to set up the cropper
+ // Function to set up the cropper for both update and add cases
+function setupCropper(inputId, imageBoxId, confirmBtnId) {
+    const input = document.getElementById(inputId);
+    const imageBox = document.getElementById(imageBoxId);
+    const confirmBtn = document.getElementById(confirmBtnId);
+    const csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value;
 
+    if (input && imageBox && confirmBtn) {
         input.addEventListener('change', () => {
-            confirmBtn.classList.remove('not-visible');
-            const img_data = input.files[0];
-            const url = URL.createObjectURL(img_data);
+            if (input.files && input.files[0]) {
+                confirmBtn.classList.remove('not-visible');
+                const img_data = input.files[0];
+                const url = URL.createObjectURL(img_data);
 
-            imageBox.innerHTML = `<img src="${url}" id="image-${inputId}" class="croppable-image">`;
-            var $image = $(`#image-${inputId}`);
-            $image.cropper({
-                aspectRatio: 16 / 9,
-                viewMode: 1,  // This fixes the image, allowing only the cropping box to move
-                dragMode: 'move',  // Allows moving the cropping box only
-                crop: function(event) {
-                    // Handle cropping events if needed
-                }
-            });
+                // Dynamically update the image preview and show the cropping box
+                imageBox.innerHTML = `<img src="${url}" id="image-${inputId}" class="croppable-image">`;
 
-            var cropper = $image.data('cropper');
-            confirmBtn.addEventListener('click', () => {
-                cropper.getCroppedCanvas().toBlob((blob) => {
-                    console.log('confirmed');
-                    const fd = new FormData();
-                    fd.append('csrfmiddlewaretoken', csrf[0].value);
-                    fd.append(inputId, blob, `${inputId}-cropped.png`);
+                // Initialize cropper for the new image
+                const $image = $(`#image-${inputId}`);
+                $image.cropper({
+                    aspectRatio: 16 / 9,
+                    viewMode: 1,
+                    dragMode: 'move',
+                });
 
-                    $.ajax({
-                        type: 'POST',
-                        url: window.location.href,
-                        enctype: 'multipart/form-data',
-                        data: fd,
-                        success: function(response) {
-                            console.log('success', response);
-                        },
-                        error: function(error) {
-                            console.log('error', error);
-                        },
-                        cache: false,
-                        contentType: false,
-                        processData: false,
+                const cropper = $image.data('cropper');
+                confirmBtn.addEventListener('click', () => {
+                    cropper.getCroppedCanvas().toBlob((blob) => {
+                        const fd = new FormData();
+                        fd.append('csrfmiddlewaretoken', csrf);
+                        fd.append(inputId, blob, `${inputId}-cropped.png`);
+
+                        $.ajax({
+                            type: 'POST',
+                            url: window.location.href,
+                            enctype: 'multipart/form-data',
+                            data: fd,
+                            success: function(response) {
+                                console.log('success', response);
+                            },
+                            error: function(error) {
+                                console.log('error', error);
+                            },
+                            cache: false,
+                            contentType: false,
+                            processData: false,
+                        });
                     });
                 });
-            });
+            }
         });
+    } else {
+        console.error('SetupCropper: Missing elements for initialization.');
     }
+}
 
-    setupCropper('id_images', 'image-box-variation_images', 'confirm-btn-variation_images');
+// Initialize cropper for the main variation image (both in creation and update)
+setupCropper('id_images', 'image-box-variation_images', 'confirm-btn-variation_images');
+
+// Initialize cropper for each formset item dynamically (both in creation and update)
+{% for form in formset %}
+    setupCropper(
+        'id_form-{{ forloop.counter0 }}-images',  // Dynamically generated image input ID
+        'image-box-variation_images_{{ forloop.counter0 }}',  // Unique ID for the cropping box
+        'confirm-btn-variation_images_{{ forloop.counter0 }}'  // Unique confirm button ID
+    );
+{% endfor %}
+
 </script>
+
 {% endblock %}

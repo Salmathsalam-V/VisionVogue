@@ -65,8 +65,7 @@
                     <th>Image</th>
                     <th>Quantity</th>
                     <th>Price</th>
-                    <th>Shipping </th>
-                    <th>Subtotal</th>
+                    
                 </tr>
             </thead>
             <tbody>
@@ -76,13 +75,17 @@
                     <!-- <td><img src="{{ order_product.variation.images.url }}" class="img-fluid me-3 rounded" style="width: 100px; height: 100px;" alt=""></td> -->
                     <td>{{ order_product.variation.variation_value }}</td>
                     <td>{{ order_product.quantity }}</td>
-                    <td>${{ order_product.product_price }}</td>
-                    <td>100 for a order</td>
-                    <td>${{ total_price }}</td>
+                    <td>${{ order_product.variation.offer_price }}</td>
+                    
                 </tr>
                 {% endfor %}
                 <tr>
-                    <td colspan="3" class="total">Total:</td>
+                    <td><strong>Shipping</strong></td>
+                    <td>100 </td>
+                    <td><strong>Subtotal</strong></td>
+                    <td>{{ total_price }}</td>
+                </tr>
+                <tr>  <td colspan="3" class="total">Total:</td>
                     <td class="total">${{ total_price }}</td>
                 </tr>
             </tbody>

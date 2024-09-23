@@ -2,10 +2,10 @@ import datetime
 import json
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render,redirect
-from Accounts.models import Address, Transaction, Wallet
+from Accounts.models import Address, Wallet
 from VisionVogue import settings
 from carts . models import Cart,CartItem
-from . models import Order, OrderProduct, Payment,Return
+from . models import Order, OrderProduct, Payment,Return,Transaction
 from. forms import AddressForm
 from django.contrib import messages
 import razorpay
@@ -21,6 +21,8 @@ from django.http import JsonResponse
 
 # Create your views here.
 def place_order(request, total=0, quantity=0):
+    if not request.user.is_authenticated:
+        return redirect('login')
     current_user = request.user  
     cartid = Cart.objects.get(user_id=current_user) 
     cart_items = CartItem.objects.filter(cart=cartid)
@@ -118,6 +120,7 @@ def place_order(request, total=0, quantity=0):
                 return redirect('cart:checkout')
 
             Transaction.objects.create(
+                order_number = data.order_number,
                 wallet=wallet,
                 transaction_type='Debit',
                 amount=grand_total
@@ -157,6 +160,8 @@ def place_order(request, total=0, quantity=0):
         return redirect('cart:checkout')
 
 def razorpay_page(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     order = get_object_or_404(Order, id=order_id)
     payment_data = request.session.get('payment_data', {})
     cart_id = request.session.get('cart_id', None)
@@ -204,33 +209,92 @@ def razorpay_page(request, order_id):
     }
     return render(request, 'store/razorpay_page.html', context)
 
-@csrf_exempt  # Make sure you have CSRF token protection for AJAX POST requests
+@csrf_exempt
 def payment_failed(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     if request.method == 'POST':
-        data = json.loads(request.body)
-        order_id = data.get('order_id')
-        error_description = data.get('error_description')
-
         try:
+            data = json.loads(request.body)
+
+            order_id = data.get('order_id')
+            error_description = data.get('error_description')
+
+            # Log the received data for debugging
+            print(f"Received payment_failed data: order_id={order_id}, error_description={error_description}")
+
             # Get the order and payment object
             order = Order.objects.get(id=order_id)
-            payment = Payment.objects.get(order=order)
-
+            payment = Payment.objects.filter(order=order).first()
+            print(payment,payment.status)
             # Update payment status to "Pending"
             payment.status = 'Pending'
+            print(payment.status)
             payment.save()
 
             return JsonResponse({'status': 'success'}, status=200)
-
+        
         except Order.DoesNotExist:
+            # Log error for debugging
+            print(f"Order with id {order_id} does not exist.")
             return JsonResponse({'error': 'Order not found'}, status=404)
 
         except Payment.DoesNotExist:
+            # Log error for debugging
+            print(f"Payment associated with order {order_id} does not exist.")
             return JsonResponse({'error': 'Payment not found'}, status=404)
+
+        except Exception as e:
+            # Log unexpected errors
+            print(f"Unexpected error: {e}")
+            return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
+def continue_payment(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    try:
+        # Get the order and existing payment information
+        order = Order.objects.get(id=order_id)
+        payment = Payment.objects.filter(order=order).first()
 
+        # Handle missing payment gracefully
+        if not payment:
+            return JsonResponse({'error': 'Payment not found'}, status=404)
+
+        # Initialize Razorpay client
+        client = razorpay.Client(auth=(settings.RAZOR_PAY_KEY_ID, settings.KEY_SECRET))
+        print(type(payment.amount_paid))
+        amount = float(payment.amount_paid)
+        # Prepare the new payment data for Razorpay
+        payment_data = {
+            "amount": int(amount * 100),  # Convert to paise
+            "currency": "INR",
+            "receipt": order.order_number,  # Use the same order number or generate a new one if required
+            "payment_capture": 1,
+        }
+
+        # Create new order with Razorpay
+        razorpay_payment = client.order.create(data=payment_data)
+
+        # Store payment details in session to use later
+        request.session['payment_data'] = razorpay_payment
+        payment.status="Completed"
+        payment.save()
+        # Redirect to Razorpay page or return context to render the page
+        context = {
+            'payment_data': razorpay_payment,
+            'order': order,
+        }
+        return render(request, 'store/razorpay_page.html', context)
+
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return JsonResponse({'error': 'An unexpected error occurred'}, status=500)
+    
 def view_orders(request):
     if request.user.is_authenticated:
         orders = Order.objects.filter(user=request.user).order_by('-created_at')
@@ -246,6 +310,8 @@ def view_orders(request):
 
     
 def order_detail(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     order = get_object_or_404(Order, id=order_id, user=request.user)
     order_products = OrderProduct.objects.filter(order = order_id)
     payment = Payment.objects.filter(payment_id=order.order_number)[:1]
@@ -258,6 +324,8 @@ def order_detail(request, order_id):
 
 
 def payment_success_view(request,order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     order = get_object_or_404(Order, id=order_id)
     payment_method = request.session.get('payment_method', {})
     context = {
@@ -276,6 +344,8 @@ def cancel_order_confirmation(request, order_id):
     return render(request, 'store/cancel_order_confirmation.html', {'order': order})
 
 def cancel_order(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     order = get_object_or_404(Order, id=order_id)
     if order.status != 'Cancelled': 
         order_products = OrderProduct.objects.filter(order = order_id)
@@ -292,6 +362,7 @@ def cancel_order(request, order_id):
     wallet.balance = wallet.balance + Decimal(balance)
     wallet.save()
     Transaction.objects.create(
+            order_number = order.order_number,
             wallet = wallet,
             transaction_type = 'Credit',
             amount = order.order_total
@@ -309,6 +380,8 @@ def return_order_confirmation(request, order_id):
     return render(request, 'store/return_order_confirmation.html', {'order': order})
 
 def return_order(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     order = get_object_or_404(Order, id=order_id)
     user =  user=request.user
     reason = request.session.get('reason', '')
@@ -336,6 +409,8 @@ def return_order(request, order_id):
     return redirect('order_detail', order_id=order_id)
 
 def generate_invoice_pdf(request, order_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     try:
         order = Order.objects.get(id=order_id)
     except Order.DoesNotExist:

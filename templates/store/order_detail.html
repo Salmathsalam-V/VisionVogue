@@ -70,7 +70,11 @@
                 {% if order.status == "Completed" and i.status == "Completed"  %}
                 <div>
                     <a href="{% url 'return_order_confirmation' order.id %}" class="btn btn-danger mb-2">Return Order</a>
-                
+                </div>
+                {% endif %}
+                {% if i.payment_method == "Razorpay" and i.status == "Pending"  %}
+                <div>
+                    <a href="{% url 'continue_payment' order.id %}" class="btn btn-primary mb-2">Continue Payment</a>
                 </div>
                 {% endif %}
                 {% endfor %}
@@ -78,5 +82,59 @@
         </div>
     </div>
 </div>
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                    <script>
+                        var options = {
+                            "key": "{{ payment_data.key }}",
+                            "amount": "{{ payment_data.amount }}",
+                            "currency": "INR",
+                            "name": "VisionVogue",
+                            "description": "Order #{{ order.order_number }}",
+                            "order_id": "{{ payment_data.id }}",
+                            "handler": function (response){
+                                // Set the values of the hidden form
+                                document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                                document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+                                document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                    
+                                // Submit the hidden form to redirect to the success page
+                                document.getElementById('payment-success-form').submit();
+                            },
+                            "theme": {
+                                "color": "#3399cc"
+                            }
+                        };
+                    
+                        var rzp1 = new Razorpay(options);
+                    
+                    rzp1.on('payment.failed', function (response) {
+                        console.log("Payment Failed: " + response.error.description);
+                    
+                        var order_id = "{{ order.id }}";
+                        var csrf_token = "{{ csrf_token }}";  // CSRF token for the request
+                    
+                        fetch("{% url 'payment_failed' %}", {
+                            method: "POST",
+                            headers: {
+                                "X-CSRFToken": csrf_token,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                "order_id": order_id,
+                                "error_description": response.error.description
+                            }),
+                        }).then(function (response) {
+                            return response.json();
+                        }).then(function (data) {
+                            console.log("Payment status updated to Pending.");
+                        }).catch(function (error) {
+                            console.error("Error updating payment status:", error);
+                        });
+                    });
+                    
+                        document.getElementById('rzp-button').onclick = function(e){
+                            rzp1.open();
+                            e.preventDefault();
+                        }
+                    </script>
 {% endblock %}

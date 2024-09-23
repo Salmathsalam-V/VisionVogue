@@ -3,8 +3,10 @@
 {% block content %}
 <br><br><br><br><br><br><br><br>
 <div class="container payment-container">
-    <h1>Payment Details</h1>
-    <button class="btn btn-success pay-now-btn" id="rzp-button">Pay Now</button>
+    <h1>Order Id : {{order.order_number}}</h1>
+    <h3>Payment Amount : {{ payment_data.amount }}</h3>
+    <p>Click countinue button for payment </p>
+    <button class="btn btn-success pay-now-btn" id="rzp-button">Countinue</button>
 </div>
 
 <!-- Hidden form to handle the payment success redirect -->
@@ -40,31 +42,30 @@
 
     var rzp1 = new Razorpay(options);
 
-    rzp1.on('payment.failed', function (response){
-        console.log("Payment Failed: " + response.error.description);
-        
-        // Perform an AJAX request to update payment status to "Pending"
-        var order_id = "{{ order.id }}";
-        var csrf_token = "{{ csrf_token }}";  // CSRF token for the request
-        console.log("before fetch")
-        fetch("{% url 'payment_failed' %}", {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": csrf_token,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                "order_id": order_id,
-                "error_description": response.error.description
-            }),
-        }).then(function (response) {
-            return response.json();
-        }).then(function (data) {
-            console.log("Payment status updated to Pending.");
-        }).catch(function (error) {
-            console.error("Error updating payment status:", error);
-        });
+ rzp1.on('payment.failed', function (response) {
+    console.log("Payment Failed: " + response.error.description);
+
+    var order_id = "{{ order.id }}";
+    var csrf_token = "{{ csrf_token }}";  // CSRF token for the request
+
+    fetch("{% url 'payment_failed' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrf_token,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            "order_id": order_id,
+            "error_description": response.error.description
+        }),
+    }).then(function (response) {
+        return response.json();
+    }).then(function (data) {
+        console.log("Payment status updated to Pending.");
+    }).catch(function (error) {
+        console.error("Error updating payment status:", error);
     });
+});
 
     document.getElementById('rzp-button').onclick = function(e){
         rzp1.open();

@@ -3,9 +3,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render,redirect
 from django.urls import reverse
 
+from Orders.models import Transaction
 from carts.models import Coupon
 from .forms import PasswordResetForm, RegisterForm, ChangePassword
-from .models import Account, OtpToken,Address, Transaction, Wallet
+from .models import Account, OtpToken,Address, Wallet
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -25,6 +26,7 @@ import requests
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from . models import Referral
+from django.views.decorators.cache import never_cache
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -32,6 +34,7 @@ User = get_user_model()
 def account_index(request):
     return render(request, "account_index.html")
 
+@never_cache
 def signup(request):
     form = RegisterForm()
     if request.method == 'POST':
@@ -109,6 +112,7 @@ def resend_otp(request):
     context = {}
     return render(request, "account/resend_otp.html", context)
 
+@never_cache
 def signin(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -133,6 +137,7 @@ def signin(request):
     return render(request, "account/login.html")
 # google
 
+@never_cache
 @csrf_exempt
 def auth_receiver(request):
     print('Inside')
@@ -148,14 +153,14 @@ def auth_receiver(request):
     request.session['user_data'] = user_data
     return redirect('store:store')
 
-
+@never_cache
 def sign_out(request):
     del request.session['user_data']
     return redirect('login')
 
 # google end
 
-
+@never_cache
 def signout(request):
     logout(request)
     return redirect('signin')
@@ -163,12 +168,16 @@ def signout(request):
 # Account and signup end
 
 def my_account(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     current_user = request.user
     wallet, created = Wallet.objects.get_or_create(user=current_user)
     context= {'wallet': wallet }
     return render(request,'account/my_account.html',context)
 
 def profile(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     current_user = request.user  
     user = Account.objects.get(email=current_user.email)
     address = Address.objects.filter(user=current_user).order_by('-id')[:2]
@@ -198,6 +207,8 @@ def profile(request):
 
 @login_required
 def address_list(request, selected_address_id=None):
+    if not request.user.is_authenticated:
+        return redirect('login')
     current_user = request.user  
     address = Address.objects.filter(user=current_user).order_by('id')
 
@@ -240,6 +251,8 @@ def edit_address_action(request):
     return redirect('address_list')
 
 def add_address_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     if request.method == 'POST':
         form = AddressForm(request.POST)
         if form.is_valid():
@@ -268,12 +281,14 @@ def add_address_view(request):
             messages.error(request, 'Please correct the errors below.')
     else:  
         form = AddressForm()
-    
     return render(request, 'account/newaddress.html', {'form': form})
+
 def delete_address(request, address_id):
+    if not request.user.is_authenticated:
+        return redirect('login')
     if request.method == 'POST':
         address = get_object_or_404(Address, id=address_id)
-        
+
         if address.user != request.user:
             messages.error(request, "You do not have permission to delete this address.")
             return redirect('profile')
@@ -306,6 +321,8 @@ def forgot_password(request, username):
     return render(request, 'account/forgot_password.html', {'form': form})
 
 def change_password(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     if request.method == 'POST':
         form = ChangePassword(request.POST, user=request.user)
         if form.is_valid():
@@ -328,6 +345,8 @@ def change_password(request):
 
 @login_required
 def wallet_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     current_user = request.user
     wallet, created = Wallet.objects.get_or_create(user=current_user)
     transactions = Transaction.objects.filter(wallet=wallet).order_by('-created_at')
@@ -342,6 +361,9 @@ def wallet_view(request):
 def create_user_referral(sender, instance, created, **kwargs):
     if created:
         Referral.objects.create(user=instance)
+
 def coupon_list_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
     coupons = Coupon.objects.filter(active=True)
     return render(request, 'account/coupon_list_view.html', {'coupons': coupons})

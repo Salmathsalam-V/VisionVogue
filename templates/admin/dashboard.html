@@ -3,14 +3,6 @@
 <h2>Admin Dashboard</h2>
 
 <!-- Filter for period (yearly, monthly, weekly) -->
-<form method="GET" class="mb-4">
-    <label for="period">Select Period:</label>
-    <select name="period" id="period" onchange="this.form.submit()">
-        <option value="yearly" {% if period == 'yearly' %}selected{% endif %}>Yearly</option>
-        <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
-        <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
-    </select>
-</form>
 
 <div class="row">
     <div class="col-md-4">
@@ -29,7 +21,8 @@
                 <ul class="list-group">
                     {% for product in recent_products %}
                     <li class="list-group-item">
-                        {{ product.product_name }} - Price: ${{ product.price }} - Offer Price: ${{ product.offer_price }}
+                        <img src="{{ product.images.url }}" alt="" style="height: 50px; width: 50px;">
+                         {{ product.product.product_name }} - Price: ${{ product.price }} - Offer Price: ${{ product.offer_price }}
                     </li>
                     {% endfor %}
                 </ul>
@@ -37,6 +30,14 @@
         </div>
     </div>
 </div>
+<form method="GET" class="mb-4">
+    <label for="period">Select Period:</label>
+    <select name="period" id="period" onchange="this.form.submit()">
+        <option value="yearly" {% if period == 'yearly' %}selected{% endif %}>Yearly</option>
+        <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
+        <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
+    </select>
+</form>
 
 <div class="row mt-4">
     <div class="col">
@@ -56,10 +57,10 @@
         var categoryChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {{ category_labels|safe }},
+                labels: {{ category_labels|safe }},  // Dynamic labels for year, month, or week
                 datasets: [{
                     label: 'Total Sales',
-                    data: {{ category_data|safe }},
+                    data: {{ category_data|safe }},  // Dynamic sales data
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
@@ -75,4 +76,5 @@
         });
     });
 </script>
+
 {% endblock %}
