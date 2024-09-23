@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from decouple import config
 
 
 load_dotenv()
@@ -227,5 +228,5 @@ LOGIN_REDIRECT_URL = "/"
 # logout
 LOGOUT_REDIRECT_URL = "/" 
 
-RAZOR_PAY_KEY_ID = 'rzp_test_b0Mik8b8qR8I43'
-KEY_SECRET = 'IU2TsYkc4gLiKfavad75WNRR'
+RAZOR_PAY_KEY_ID = config('RAZOR_PAY_KEY_ID')
+KEY_SECRET = config('KEY_SECRET')
