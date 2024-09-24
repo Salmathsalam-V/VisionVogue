@@ -59,8 +59,9 @@
 
           <button class="btn btn-primary" style="width:100%">Login to your account</button>
           <p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
-          <p><a href="{% url 'resend-otp' %}">Forgot Password</a></p>
           <p><a href="{% provider_login_url 'google' %}?next=/">Login with Google</a></p>
+
+          <p><a href="{% url 'resend-otp' %}">Forgot Password</a></p>
 
         </div>
 
