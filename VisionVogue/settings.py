@@ -138,7 +138,7 @@ DATABASES = {
         'NAME': 'visionvogue1',
         'USER': 'salmu',
         'PASSWORD': '1234',
-        'HOST': 'localhost',  # Or '127.0.0.1'
+        'HOST': 'localhost',
         'PORT': '5433',  
     }
 }
@@ -180,9 +180,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static/")]
-STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # media files configuration
 MEDIA_URL = '/media/'
