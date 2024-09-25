@@ -134,13 +134,12 @@ AUTH_USER_MODEL = 'Accounts.Account'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'visionvogue',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'visionvogue1',
+        'USER': 'salmu',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
-        'PORT' : '5433',
-        'USER' : 'postgres',
-        'PASSWORD' : 'salmu1020' 
-
+        'PORT': '',
     }
 }
 
