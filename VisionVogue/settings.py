@@ -138,8 +138,8 @@ DATABASES = {
         'NAME': 'visionvogue1',
         'USER': 'salmu',
         'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '',
+        'HOST': 'localhost',  # Or '127.0.0.1'
+        'PORT': '5433',  
     }
 }
 
