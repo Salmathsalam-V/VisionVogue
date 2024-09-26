@@ -45,18 +45,6 @@ def store(request, category_slug=None):
     if sex_filter:
         products = products.filter(sex__in=sex_filter)  # Adjusted for multiple selections
 
-    # additional_sort = request.GET.get('additional_sort', 'none')
-    # # Filtering by additional feature
-    # if additional_sort == 'polarized':
-    #     products = products.filter(Q(features='polarized'))
-    # elif additional_sort == 'gradient':
-    #     products = products.filter(Q(features='gradient'))
-    # elif additional_sort == 'uv protection':
-    #     products = products.filter(Q(features='uv protection'))
-    # elif additional_sort == 'color changing':
-    #     products = products.filter(Q(features='color changing'))
-
-
     # Sorting logic
     sort_option = request.GET.get('fruitlist', 'nothing')
     if sort_option == 'Low':
@@ -210,7 +198,6 @@ def post_review(request, product_id):
         'product':product
     }
     return render(request, 'store/product_detail.html', context)
-
 
 
 def search(request):
