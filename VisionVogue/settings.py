@@ -18,14 +18,6 @@ from decouple import config
 load_dotenv()
 
 SITE_ID=2
-# GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
-# if not GOOGLE_OAUTH_CLIENT_ID:
-#     raise ValueError(
-#         'GOOGLE_OAUTH_CLIENT_ID is missing.' 
-#         'Have you put it in a file at in visionvogue.env ?'
-#     )
-
-# We need these lines below to allow the Google sign in popup to work.
 SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
@@ -130,7 +122,6 @@ WSGI_APPLICATION = 'VisionVogue.wsgi.application'
 
 AUTH_USER_MODEL = 'Accounts.Account'
 # Database
-# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
