@@ -391,24 +391,6 @@ def update_order_status(request, order_id):
                     i.save()
                     print(i.variation.stock)
                 print("payment",payment)
-                # if payment.status == 'Completed':
-                #     wallet=Wallet.objects.get(user=order.user)
-                #     print(wallet.balance)
-                #     wallet.balance += Decimal(order.order_total)
-                #     print(wallet.balance)
-                #     wallet.save()
-                #     messages.success(request, 'The amount transfered into users wallet!')
-
-                    # variation = Variation.objects.filter(variation=order_products.variation)
-                # print(variation,"********")
-                # for order_product in order_products:
-                #     # Update the stock of the product
-                #     product = order_product.product
-                #     for i in variation:
-                #         if product.variation == i:
-                #             i.stock += order_product.quantity
-                #             i.save()
-                #     product.save()
             updated_order.save()
             messages.success(request, 'Order status updated successfully!')
             return redirect('myadmin:view_orders')
@@ -494,12 +476,11 @@ def sales_report(request):
     elif period == 'monthly':
         orders = orders.filter(created_at__month=timezone.now().month)
     else:
-        # Custom date range already handled above
         pass
 
     # Aggregate the data based on filtered orders, focusing on product variations
     data = orders.values(
-        'orderproduct__variation__variation_value',  # Get variation value (e.g., color)
+        'orderproduct__variation__variation_value',  # Get variation value
         'orderproduct__variation__product__product_name',  # Get product name
         'orderproduct__variation__price',  # Get the price of the variation
         'orderproduct__variation__offer_price',  # Get the offer price of the variation
