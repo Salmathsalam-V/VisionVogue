@@ -150,22 +150,22 @@
                     </div>
     
                     {% if user.is_authenticated %}
-    {% if product.active_variations %}
-        {% with first_variation=product.active_variations.0 %}
-            {% if first_variation.id in wishlist %}
-                <!-- If the first variation is already in the wishlist, show a filled heart icon -->
-                <a href="{% url 'store:remove_from_wishlist' first_variation.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
-                    <i class="fa-solid fa-heart" style="color: #ff0000;"></i>
-                </a>
-            {% else %}
-                <!-- If the first variation is not in the wishlist, show an empty heart icon -->
-                <a href="{% url 'store:add_to_wishlist' first_variation.id %}" title="Add to Wishlist" onclick="addToWishlist(event, this.href)">
-                    <i class="far fa-heart"></i>
-                </a>
-            {% endif %}
-        {% endwith %}
-    {% endif %}
-{% endif %}
+                            {% if product.active_variations %}
+                                {% with first_variation=product.active_variations.0 %}
+                                    {% if first_variation.id in wishlist %}
+                                        <!-- If the first variation is already in the wishlist, show a filled heart icon -->
+                                        <a href="{% url 'store:remove_from_wishlist' first_variation.id %}" title="Remove from Wishlist" onclick="addToWishlist(event, this.href)">
+                                            <i class="fa-solid fa-heart" style="color: #ff0000;"></i>
+                                        </a>
+                                    {% else %}
+                                        <!-- If the first variation is not in the wishlist, show an empty heart icon -->
+                                        <a href="{% url 'store:add_to_wishlist' first_variation.id %}" title="Add to Wishlist" onclick="addToWishlist(event, this.href)">
+                                            <i class="far fa-heart"></i>
+                                        </a>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endif %}
 
                     <p>{{ product.color }}</p>
     
