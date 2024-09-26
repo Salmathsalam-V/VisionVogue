@@ -17,7 +17,7 @@ from decouple import config
 
 load_dotenv()
 
-SITE_ID=2
+SITE_ID=1
 # GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
 # if not GOOGLE_OAUTH_CLIENT_ID:
 #     raise ValueError(
