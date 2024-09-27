@@ -1,6 +1,33 @@
-# Ignore environment variables
-.env
+# Ignore environment directories
+env/
+venv/
+env1/
+*.env
 
-# Ignore Python cache files
+# Ignore Python cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Ignore compiled files
+*.so
+
+# Ignore log files
+*.log
+
+# Ignore Database files
+*.sqlite3
+
+# Ignore virtual environment directories
+.env/
+*.egg-info/
+*.idea/
+.DS_Store
+
+# Ignore bytecode
+*.py[cod]
+
+# Ignore dist files
+/dist/
+/build/
